@@ -8,7 +8,7 @@ from termcolor import colored
 # Human player is player 1. Player 3 is your teammate
 
 # Define our classes: Card, Deck, Player & Team
-
+#test
 
 class Card:
     def __init__(self, suit, rank, point, left_bower, left_bower_suit, owner, display, card_string, clincher=False):
