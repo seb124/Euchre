@@ -392,11 +392,11 @@ def computer_order_up_card(p, flipped_c, suit, dealer_, pts_to_call_suit, testin
     else:
         was_card_picked_up = False
         caller = None
-        print(f'{p.name}: Pass')
+        not testing and print(f'{p.name}: Pass')
     return p, suit, was_card_picked_up, dealer_, caller
 
 
-def computer_pick_up_card(p, flipped_c, suit, pts_to_call_suit):
+def computer_pick_up_card(p, flipped_c, suit, pts_to_call_suit, testing):
     # This adds the point value of the flipped card to the appropriate suit points for the cards in the dealers hand
     # Ex. if the 9 of Diamonds is flipped, the dealers hand gains 7 points for diamonds card_values
     # Dealer will pick up the card if that suit has >= points in card_values[] than the POINTS_TO_CALL_SUIT variable
@@ -429,12 +429,12 @@ def computer_pick_up_card(p, flipped_c, suit, pts_to_call_suit):
             len_hand = len(p.hand)
             p.hand.pop(random.randint(0, len_hand))
     else:
-        print(f'{p.name}: Pass')
+        not testing and print(f'{p.name}: Pass')
 
     return p, suit, was_card_picked_up, caller
 
 
-def computer_choose_call_suit(p, flipped_c, suit, pts_to_call_suit):
+def computer_choose_call_suit(p, flipped_c, suit, pts_to_call_suit, testing):
     # This will give the computer the option to call suit after everyone has refused to call the suit of flipped card
     # It will only call suit if the player has more pts in that suit than the variable POINTS_TO_CALL_SUIT
 
@@ -443,14 +443,14 @@ def computer_choose_call_suit(p, flipped_c, suit, pts_to_call_suit):
     best_suit_idx = p.card_values.index(max(p.card_values))
     if p.card_values[best_suit_idx] < pts_to_call_suit:
         caller = None
-        print(f'{p.name}: Pass')
+        not testing and print(f'{p.name}: Pass')
         pass
     elif suits[best_suit_idx] == flipped_c.suit:  # Comp may not call suit that was turned down earlier
         p.card_values[best_suit_idx] = 0
         second_best_suit_idx = p.card_values.index(max(p.card_values))
         if p.card_values[second_best_suit_idx] < pts_to_call_suit:
             caller = None
-            print(f'{p.name}: Pass')
+            not testing and print(f'{p.name}: Pass')
             pass
         else:
             was_suit_declared = True
@@ -1103,26 +1103,26 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
             if was_suit_picked:
                 break
             player2, best_suit, was_suit_picked, player4, calling_player = \
-                computer_order_up_card(player2, flipped_card, best_suit, player4, POINTS_TO_CALL_SUIT)
+                computer_order_up_card(player2, flipped_card, best_suit, player4, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             player3, best_suit, was_suit_picked, player4, calling_player = \
-                computer_order_up_card(player3, flipped_card, best_suit, player4, POINTS_TO_CALL_SUIT)
+                computer_order_up_card(player3, flipped_card, best_suit, player4, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             player4, best_suit, was_suit_picked, calling_player = \
-                computer_pick_up_card(player4, flipped_card, best_suit, POINTS_TO_CALL_SUIT)
+                computer_pick_up_card(player4, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
-            best_suit, was_suit_picked, calling_player = user_choose_call_suit(player1, flipped_card, best_suit) if not testing else computer_choose_call_suit(player1, flipped_card, best_suit, POINTS_TO_CALL_SUIT)
-            if was_suit_picked:
-                break
-            best_suit, was_suit_picked, calling_player = \
-                computer_choose_call_suit(player2, flipped_card, best_suit, POINTS_TO_CALL_SUIT)
+            best_suit, was_suit_picked, calling_player = user_choose_call_suit(player1, flipped_card, best_suit) if not testing else computer_choose_call_suit(player1, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             best_suit, was_suit_picked, calling_player = \
-                computer_choose_call_suit(player3, flipped_card, best_suit, POINTS_TO_CALL_SUIT)
+                computer_choose_call_suit(player2, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
+            if was_suit_picked:
+                break
+            best_suit, was_suit_picked, calling_player = \
+                computer_choose_call_suit(player3, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             best_suit, was_suit_picked, calling_player = computer_must_call_suit(player4, flipped_card, best_suit)
@@ -1132,30 +1132,30 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
     elif dlr_index == 1:
         while True:
             player2, best_suit, was_suit_picked, player1, calling_player = \
-                computer_order_up_card(player2, flipped_card, best_suit, player1, POINTS_TO_CALL_SUIT, testing=True)
+                computer_order_up_card(player2, flipped_card, best_suit, player1, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             player3, best_suit, was_suit_picked, player1, calling_player = \
-                computer_order_up_card(player3, flipped_card, best_suit, player1, POINTS_TO_CALL_SUIT, testing=True)
+                computer_order_up_card(player3, flipped_card, best_suit, player1, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             player4, best_suit, was_suit_picked, player1, calling_player = \
-                computer_order_up_card(player4, flipped_card, best_suit, player1, POINTS_TO_CALL_SUIT, testing=True)
+                computer_order_up_card(player4, flipped_card, best_suit, player1, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
-            player1, best_suit, was_suit_picked, calling_player = user_pick_up_card(player1, flipped_card, best_suit) if not testing else computer_pick_up_card(player1, flipped_card, best_suit, POINTS_TO_CALL_SUIT)
-            if was_suit_picked:
-                break
-            best_suit, was_suit_picked, calling_player = \
-                computer_choose_call_suit(player2, flipped_card, best_suit, POINTS_TO_CALL_SUIT)
+            player1, best_suit, was_suit_picked, calling_player = user_pick_up_card(player1, flipped_card, best_suit) if not testing else computer_pick_up_card(player1, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             best_suit, was_suit_picked, calling_player = \
-                computer_choose_call_suit(player3, flipped_card, best_suit, POINTS_TO_CALL_SUIT)
+                computer_choose_call_suit(player2, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             best_suit, was_suit_picked, calling_player = \
-                computer_choose_call_suit(player4, flipped_card, best_suit, POINTS_TO_CALL_SUIT)
+                computer_choose_call_suit(player3, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
+            if was_suit_picked:
+                break
+            best_suit, was_suit_picked, calling_player = \
+                computer_choose_call_suit(player4, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             best_suit, was_suit_picked, calling_player = user_must_call_suit(player1, best_suit, flipped_card) if not testing else computer_must_call_suit(player1, flipped_card, best_suit)
@@ -1165,30 +1165,30 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
     elif dlr_index == 2:
         while True:
             player3, best_suit, was_suit_picked, player2, calling_player = \
-                computer_order_up_card(player3, flipped_card, best_suit, player2, POINTS_TO_CALL_SUIT)
+                computer_order_up_card(player3, flipped_card, best_suit, player2, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             player4, best_suit, was_suit_picked, player2, calling_player = \
-                computer_order_up_card(player4, flipped_card, best_suit, player2, POINTS_TO_CALL_SUIT)
+                computer_order_up_card(player4, flipped_card, best_suit, player2, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             player1, best_suit, was_suit_picked, player2, calling_player = \
-                user_order_up_card(player1, flipped_card, best_suit, player2) if not testing else computer_order_up_card(player1, flipped_card, best_suit, player2, POINTS_TO_CALL_SUIT)
+                user_order_up_card(player1, flipped_card, best_suit, player2) if not testing else computer_order_up_card(player1, flipped_card, best_suit, player2, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             player2, best_suit, was_suit_picked, calling_player = \
-                computer_pick_up_card(player2, flipped_card, best_suit, POINTS_TO_CALL_SUIT)
+                computer_pick_up_card(player2, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             best_suit, was_suit_picked, calling_player = \
-                computer_choose_call_suit(player3, flipped_card, best_suit, POINTS_TO_CALL_SUIT)
+                computer_choose_call_suit(player3, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             best_suit, was_suit_picked, calling_player = \
-                computer_choose_call_suit(player4, flipped_card, best_suit, POINTS_TO_CALL_SUIT)
+                computer_choose_call_suit(player4, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
-            best_suit, was_suit_picked, calling_player = user_choose_call_suit(player1, flipped_card, best_suit) if not testing else computer_choose_call_suit(player1, flipped_card, best_suit, POINTS_TO_CALL_SUIT)
+            best_suit, was_suit_picked, calling_player = user_choose_call_suit(player1, flipped_card, best_suit) if not testing else computer_choose_call_suit(player1, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             best_suit, was_suit_picked, calling_player = computer_must_call_suit(player2, flipped_card, best_suit)
@@ -1198,30 +1198,30 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
     elif dlr_index == 3:
         while True:
             player4, best_suit, was_suit_picked, player3, calling_player = \
-                computer_order_up_card(player4, flipped_card, best_suit, player3, POINTS_TO_CALL_SUIT)
+                computer_order_up_card(player4, flipped_card, best_suit, player3, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             player1, best_suit, was_suit_picked, player3, calling_player = \
-                user_order_up_card(player1, flipped_card, best_suit, player3) if not testing else computer_order_up_card(player1, flipped_card, best_suit, player3, POINTS_TO_CALL_SUIT)
+                user_order_up_card(player1, flipped_card, best_suit, player3) if not testing else computer_order_up_card(player1, flipped_card, best_suit, player3, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             player2, best_suit, was_suit_picked, player3, calling_player = \
-                computer_order_up_card(player2, flipped_card, best_suit, player3, POINTS_TO_CALL_SUIT)
+                computer_order_up_card(player2, flipped_card, best_suit, player3, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             player3, best_suit, was_suit_picked, calling_player = \
-                computer_pick_up_card(player3, flipped_card, best_suit, POINTS_TO_CALL_SUIT)
+                computer_pick_up_card(player3, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             best_suit, was_suit_picked, calling_player = \
-                computer_choose_call_suit(player4, flipped_card, best_suit, POINTS_TO_CALL_SUIT)
+                computer_choose_call_suit(player4, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
-            best_suit, was_suit_picked, calling_player = user_choose_call_suit(player1, flipped_card, best_suit) if not testing else computer_choose_call_suit(player1, flipped_card, best_suit, POINTS_TO_CALL_SUIT)
+            best_suit, was_suit_picked, calling_player = user_choose_call_suit(player1, flipped_card, best_suit) if not testing else computer_choose_call_suit(player1, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             best_suit, was_suit_picked, calling_player = \
-                computer_choose_call_suit(player2, flipped_card, best_suit, POINTS_TO_CALL_SUIT)
+                computer_choose_call_suit(player2, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             best_suit, was_suit_picked, calling_player = computer_must_call_suit(player3, flipped_card, best_suit)
@@ -1310,10 +1310,10 @@ def play_game(testing):
         d.destroy()
         d.build()
         if team_1.points >= 11:
-            print(f'You win the game! Final Score: {team_1.points}-{team_2.points}')
+            not testing and print(f'You win the game! Final Score: {team_1.points}-{team_2.points}')
             return "1"
         elif team_2.points >= 11:
-            print(f'You lose the game! Final Score: {team_1.points}-{team_2.points}')
+            not testing and print(f'You lose the game! Final Score: {team_1.points}-{team_2.points}')
             return "2"
 
 
