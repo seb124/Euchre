@@ -953,6 +953,7 @@ def play_trick(p1, p2, p3, p4, round_leader, best_suit, caller, testing):
                 p4_card, p4.hand = computer_discard_bad_card(p4.hand, best_suit)
 
         played_cards.append(p4_card)
+        player_in_lead = determine_winning_trick_so_far(played_cards)
 
         try:
             if not testing:
@@ -966,10 +967,20 @@ def play_trick(p1, p2, p3, p4, round_leader, best_suit, caller, testing):
                     print(c.display)
             p1_card, p1.hand = user_follow_suit(lead_card, p1.hand, played_cards) if not testing else computer_follow_suit(lead_card, p1.hand, played_cards)
         except ValueError:
-            p1_card, p1.hand = user_choose_card(p1.hand) if not testing else computer_discard_bad_card(p1.hand, best_suit)
+            if not testing:
+                p1_card, p1.hand = user_choose_card(p1.hand)
+            else:
+                try:
+                    if player_in_lead == 3:
+                        raise ValueError
+                    else:
+                        p1_card, p1.hand = computer_play_clincher(p1.hand, played_cards, player_in_lead, caller)                
+                except ValueError:
+                    p1_card, p1.hand = computer_discard_bad_card(p1.hand, best_suit)
 
         played_cards.append(p1_card)
-
+        player_in_lead = determine_winning_trick_so_far(played_cards)
+    
     elif round_leader == 3:
         player_in_lead = 3
         try:
@@ -981,6 +992,7 @@ def play_trick(p1, p2, p3, p4, round_leader, best_suit, caller, testing):
                 p4_card, p4.hand = computer_discard_bad_card(p4.hand, best_suit)
 
         played_cards.append(p4_card)
+        player_in_lead = determine_winning_trick_so_far(played_cards)
 
         try:
             if not testing:
@@ -994,7 +1006,16 @@ def play_trick(p1, p2, p3, p4, round_leader, best_suit, caller, testing):
                     print(c.display)
             p1_card, p1.hand = user_follow_suit(lead_card, p1.hand, played_cards) if not testing else computer_follow_suit(lead_card, p1.hand, played_cards)
         except ValueError:
-            p1_card, p1.hand = user_choose_card(p1.hand) if not testing else computer_discard_bad_card(p1.hand, best_suit)
+            if not testing:
+                p1_card, p1.hand = user_choose_card(p1.hand)
+            else:
+                try:
+                    if player_in_lead == 3:
+                        raise ValueError
+                    else:
+                        p1_card, p1.hand = computer_play_clincher(p1.hand, played_cards, player_in_lead, caller)
+                except ValueError:
+                    p1_card, p1.hand = computer_discard_bad_card(p1.hand, best_suit)
 
         played_cards.append(p1_card)
         player_in_lead = determine_winning_trick_so_far(played_cards)
@@ -1026,7 +1047,13 @@ def play_trick(p1, p2, p3, p4, round_leader, best_suit, caller, testing):
                     print(c.display)
             p1_card, p1.hand = user_follow_suit(lead_card, p1.hand, played_cards) if not testing else computer_follow_suit(lead_card, p1.hand, played_cards)
         except ValueError:
-            p1_card, p1.hand = user_choose_card(p1.hand) if not testing else computer_discard_bad_card(p1.hand, best_suit)
+            if not testing:
+                p1_card, p1.hand = user_choose_card(p1.hand)
+            else:
+                try:
+                    p1_card, p1.hand = computer_play_clincher(p1.hand, played_cards, player_in_lead, caller)                
+                except ValueError:
+                    p1_card, p1.hand = computer_discard_bad_card(p1.hand, best_suit)
 
         played_cards.append(p1_card)
         player_in_lead = determine_winning_trick_so_far(played_cards)
