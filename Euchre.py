@@ -427,7 +427,7 @@ def computer_pick_up_card(p, flipped_c, suit, pts_to_call_suit, testing):
             p.hand.pop(p.hand.index(discard))
         except ValueError:  # If the dealer has no non-clincher cards to discard, discard a random one
             len_hand = len(p.hand)
-            p.hand.pop(random.randint(0, len_hand))
+            p.hand.pop(random.randint(0, len_hand - 1))
     else:
         not testing and print(f'{p.name}: Pass')
 
@@ -1351,7 +1351,7 @@ def main():
 
     if testing:
         wins = {"Team 1": 0, "Team 2": 0}
-        for _ in range(0, 1000):
+        for _ in range(0, 10000):
             winning_team = play_game(testing=True)
             wins[winning_team] += 1
         print(wins)
