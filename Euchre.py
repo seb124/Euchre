@@ -1351,7 +1351,7 @@ def main():
 
     if testing:
         wins = {"Team 1": 0, "Team 2": 0}
-        for _ in range(0, 10000):
+        for _ in range(0, 1000):
             winning_team = play_game(testing=True)
             wins[winning_team] += 1
         print(wins)
