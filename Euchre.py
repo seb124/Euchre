@@ -1311,10 +1311,10 @@ def play_game(testing):
         d.build()
         if team_1.points >= 11:
             not testing and print(f'You win the game! Final Score: {team_1.points}-{team_2.points}')
-            return "1"
+            return "Team 1"
         elif team_2.points >= 11:
             not testing and print(f'You lose the game! Final Score: {team_1.points}-{team_2.points}')
-            return "2"
+            return "Team 2"
 
 
 def main():
@@ -1323,7 +1323,7 @@ def main():
     testing = True if val is "t" else False
 
     if testing:
-        wins = {"1": 0, "2": 0}
+        wins = {"Team 1": 0, "Team 2": 0}
         for _ in range(0, 1000):
             winning_team = play_game(testing=True)
             wins[winning_team] += 1
