@@ -1347,7 +1347,7 @@ def play_game(testing):
 def main():
     # prompt user for testing or not
     val = input("Enter \"t\" if you would like to test the AI. ")
-    testing = True if val is "t" else False
+    testing = True if val == "t" else False
 
     if testing:
         wins = {"Team 1": 0, "Team 2": 0}
