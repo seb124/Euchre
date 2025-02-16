@@ -2,8 +2,6 @@ import random
 from cards import Card
 from player import Player
 
-
-
 class Computer(Player):
 
     POINTS_TO_CALL_SUIT = 30
@@ -60,32 +58,6 @@ class Computer(Player):
             caller = None
             not testing and print(f'{self.name}: Pass')
         return self, suit, was_card_picked_up, dealer, caller
-    
-    # def pick_up_card(self, suit, flipped_c):
-    # # This adds the point value of the flipped card to the appropriate suit points for the cards in the dealers hand
-    # # Ex. if the 9 of Diamonds is flipped, the dealers hand gains 7 points for diamonds card_values
-    # # Dealer will pick up the card if that suit has >= points in card_values[] than the POINTS_TO_CALL_SUIT variable
-    #     discard = None
-    #     was_card_picked_up = False
-    #     caller = None
-
-    #     ranks = ['9', '10', 'Jack', 'Queen', 'King', 'Ace']
-    #     card_value_flipped_clincher = {'Jack': 15, 'Ace': 11, 'King': 10, 'Queen': 9, '10': 8, '9': 7}
-
-    #     suit_dict = {'Clubs': 0, 'Diamonds': 1, 'Hearts': 2, 'Spades': 3}
-    #     suit_idx = suit_dict.get(flipped_c.suit)
-    #     self.card_values[suit_idx] += card_value_flipped_clincher.get(flipped_c.rank)
-    #     if self.card_values[suit_idx] >= self.POINTS_TO_CALL_SUIT:
-    #         suit = flipped_c.suit
-    #         self.hand.append(flipped_c)
-    #         was_card_picked_up = True
-    #         caller = self
-    #         self.drop_card(flipped_c)
-    #     else:
-    #         print(f'{self.name}: Pass')
-
-    #     return self, suit, was_card_picked_up, caller
-    
 
     def drop_card(self, flipped_c: Card, caller: Player):
         ranks = ['9', '10', 'Jack', 'Queen', 'King', 'Ace']

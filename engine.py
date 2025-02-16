@@ -4,22 +4,12 @@ from termcolor import colored
 from cards import Deck
 from computer import Computer
 from user import User
+from player import Team
 
 
 # This is the card game Euchre. Rules: https://bicyclecards.com/how-to-play/euchre/
 # Cards used are 9 up to Ace. 'Going alone' for a round is not a feature of this script
 # Human player is player 1. Player 3 is your teammate
-
-class Team:
-    # Teams are made up of 2 players. In real Euchre, teammates sit across the table from each other. So odd players
-    # make up team1, and even numbered players make up team2
-    # The human user is on team1 with Player3
-    def __init__(self, player_a, player_b, points, tricks):
-        self.player_a = player_a
-        self.player_b = player_b
-        self.points = points
-        self.tricks = tricks
-
 
 def assign_left_bower(best, hand):
     # This will assign the 'Correct' suit to the odd jack. it always acts as the other suit of the same color

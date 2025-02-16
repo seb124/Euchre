@@ -1,4 +1,3 @@
-import random
 import time
 from cards import Card
 from player import Player
@@ -10,7 +9,7 @@ class User(Player):
         pass
 
     def order_up_card(self, suit: str, flipped_c: Card, dealer: Player, testing: bool):
-    # This allows the user to tell a computer player whether to pick up the flipped card and call that suit clincher
+    # This allows the user to tell a player whether to pick up the flipped card and call that suit clincher
 
         options = ['y', 'n']
         print('Your hand is: \n')
@@ -21,7 +20,7 @@ class User(Player):
         while True:
             try:
                 does_user_order_card = input(
-                    f'\n{dealer.name + " is" if dealer is not self else "You are"} the dealer. Would you like{" them " if dealer is not self else ""} to pick up the flipped card? (y/n)')
+                    f'\n{dealer.name + " is" if dealer is not self else "You are"} the dealer. Would you like{" them" if dealer is not self else ""} to pick up the flipped card? (y/n)')
                 if does_user_order_card.lower() not in options:
                     raise TypeError
                 if does_user_order_card.lower() == 'y':
@@ -35,27 +34,6 @@ class User(Player):
                 return self, suit, was_suit_picked, dealer, self
             except TypeError:
                 print('Invalid input. Please enter y or n to determine whether the dealer should pick up the card')
-
-    # def pick_up_card(self, suit: str, flipped_c: Card):
-    # # This allows the user to pick up the flipped card and call that suit clincher.
-    # # This is only run when the user is the dealer for that round (only dealer may pick up card)
-
-    #     print('\n')
-    #     while True:
-    #         for c in self.hand:
-    #             print(c.display)
-    #             time.sleep(0.3)
-    #         time.sleep(0.7)
-    #         num_cards_in_hand = len(self.hand)
-    #         card_to_remove = int(input(
-    #                                 f'\nPlease enter the position (1-{num_cards_in_hand}) of the card you want to '
-    #                                 f'remove from your hand: ')) - 1
-    #         self.hand.remove(self.hand[card_to_remove])
-    #         self.hand.append(flipped_c)
-    #         suit = suit.join(flipped_c.get_suit())
-    #         was_card_picked_up = True
-    #         caller = self
-    #         return self, suit, was_card_picked_up, caller
 
     def choose_call_suit(self, suit: str, flipped_c: Card, testing: bool):
          # This allows the user to determine clincher for that round after everyone has passed on the flipped card
@@ -146,9 +124,7 @@ class User(Player):
                 print('Please enter a valid suit')   
 
     def drop_card(self, flipped_c: Card, caller: Player):
-    # This is run when the computer orders the user to pick up the flipped card. Only happens when user is dealer
-    # User adds the card to their hand, then chooses one to discard
-    # This is called by the computer_order_up_card function, but only when user is dealer
+    # Player adds the card to their hand, then chooses one to discard
 
         self.hand.append(flipped_c)
         num_cards = len(self.hand)
