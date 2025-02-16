@@ -3,7 +3,6 @@ import time
 from termcolor import colored
 from cards import Deck
 from computer import Computer
-from player import Player
 from user import User
 
 
@@ -354,7 +353,7 @@ def main():
 
     if testing:
         wins = {"Team 1": 0, "Team 2": 0}
-        for _ in range(0, 10000):
+        for _ in range(0, 1000):
             winning_team = play_game(Computer(1), Computer(2), Computer(3), Computer(4), testing=True)
             wins[winning_team] += 1
         print(wins)

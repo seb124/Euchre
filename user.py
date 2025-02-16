@@ -9,7 +9,7 @@ class User(Player):
     # user does not evaluate cards with algorithm
         pass
 
-    def order_up_card(self, suit: str, flipped_c: Card, dealer: Player):
+    def order_up_card(self, suit: str, flipped_c: Card, dealer: Player, testing: bool):
     # This allows the user to tell a computer player whether to pick up the flipped card and call that suit clincher
 
         options = ['y', 'n']
@@ -57,7 +57,7 @@ class User(Player):
     #         caller = self
     #         return self, suit, was_card_picked_up, caller
 
-    def choose_call_suit(self, suit: str, flipped_c: Card):
+    def choose_call_suit(self, suit: str, flipped_c: Card, testing: bool):
          # This allows the user to determine clincher for that round after everyone has passed on the flipped card
 
         was_suit_declared = False
