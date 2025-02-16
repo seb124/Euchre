@@ -1,6 +1,6 @@
 import random
-from cards import Card
-from player import Player
+from classes.cards import Card
+from classes.player import Player
 
 class Computer(Player):
 

@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from cards import Card
+from classes.cards import Card
 
 
 class Player:

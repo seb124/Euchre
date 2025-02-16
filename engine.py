@@ -1,10 +1,10 @@
 import random
 import time
 from termcolor import colored
-from cards import Deck
-from computer import Computer
-from user import User
-from player import Team
+from classes.cards import Deck
+from classes.computer import Computer
+from classes.user import User
+from classes.player import Team
 
 
 # This is the card game Euchre. Rules: https://bicyclecards.com/how-to-play/euchre/

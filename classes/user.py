@@ -1,6 +1,6 @@
 import time
-from cards import Card
-from player import Player
+from classes.cards import Card
+from classes.player import Player
 
 
 class User(Player):    
