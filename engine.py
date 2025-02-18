@@ -7,113 +7,10 @@ from classes.user import User
 from classes.player import Team
 
 
+# TODO: make main function that can read JSON file (config.json) and call play_game with those args - makes it really easy to test
+
 # This is the card game Euchre. Rules: https://bicyclecards.com/how-to-play/euchre/
 # Cards used are 9 up to Ace. 'Going alone' for a round is not a feature of this script
-# Human player is player 1. Player 3 is your teammate
-
-def assign_left_bower(best, hand):
-    # This will assign the 'Correct' suit to the odd jack. it always acts as the other suit of the same color
-    # Other names for odd jack: left bower
-
-    for c in hand:
-        if best == 'Clubs' and c.card_string == 'Jack of Spades':
-            c.left_bower = True
-            c.left_bower_suit = 'Clubs'
-
-        elif best == 'Diamonds' and c.card_string == 'Jack of Hearts':
-            c.left_bower = True
-            c.left_bower_suit = 'Diamonds'
-
-        elif best == 'Hearts' and c.card_string == 'Jack of Diamonds':
-            c.left_bower = True
-            c.left_bower_suit = 'Hearts'
-
-        elif best == 'Spades' and c.card_string == 'Jack of Clubs':
-            c.left_bower = True
-            c.left_bower_suit = 'Spades'
-        else:
-            pass
-    return hand
-
-
-def assign_points(hand, best, lead):
-    # This is called at the start of every round after the 1st card is played
-    # This gives point values to every card that could potentially win the round (clincher > suit of 1st card)
-    # This will act as a ranking system to determine which was the best card played that round
-
-    c_clincher = {'Jack of Clubs': 13, 'Jack of Spades': 12, 'Ace of Clubs': 11, 'King of Clubs': 10,
-                  'Queen of Clubs': 9, '10 of Clubs': 8, '9 of Clubs': 7}
-    d_clincher = {'Jack of Diamonds': 13, 'Jack of Hearts': 12, 'Ace of Diamonds': 11, 'King of Diamonds': 10,
-                  'Queen of Diamonds': 9, '10 of Diamonds': 8, '9 of Diamonds': 7}
-    h_clincher = {'Jack of Hearts': 13, 'Jack of Diamonds': 12, 'Ace of Hearts': 11, 'King of Hearts': 10,
-                  'Queen of Hearts': 9, '10 of Hearts': 8, '9 of Hearts': 7}
-    s_clincher = {'Jack of Spades': 13, 'Jack of Clubs': 12, 'Ace of Spades': 11, 'King of Spades': 10,
-                  'Queen of Spades': 9, '10 of Spades': 8, '9 of Spades': 7}
-    c_lead = {'Ace of Clubs': 6, 'King of Clubs': 5, 'Queen of Clubs': 4, 'Jack of Clubs': 3,
-              '10 of Clubs': 2, '9 of Clubs': 1}
-    d_lead = {'Ace of Diamonds': 6, 'King of Diamonds': 5, 'Queen of Diamonds': 4, 'Jack of Diamonds': 3,
-              '10 of Diamonds': 2, '9 of Diamonds': 1}
-    h_lead = {'Ace of Hearts': 6, 'King of Hearts': 5, 'Queen of Hearts': 4, 'Jack of Hearts': 3,
-              '10 of Hearts': 2, '9 of Hearts': 1}
-    s_lead = {'Ace of Spades': 6, 'King of Spades': 5, 'Queen of Spades': 4, 'Jack of Spades': 3,
-              '10 of Spades': 2, '9 of Spades': 1}
-
-    if best == 'Clubs':
-        if lead.left_bower_suit == 'Spades':
-            s_lead.pop('Jack of Spades')
-            c_clincher.update(s_lead)
-        elif lead.left_bower_suit == 'Hearts':
-            c_clincher.update(h_lead)
-        elif lead.left_bower_suit == 'Diamonds':
-            c_clincher.update(d_lead)
-        elif lead.left_bower_suit == 'Clubs':
-            pass
-        lead.point = c_clincher.get(lead.card_string, 0)
-        for crd in hand:
-            crd.point = c_clincher.get(crd.card_string, 0)
-
-    elif best == 'Diamonds':
-        if lead.left_bower_suit == 'Clubs':
-            d_clincher.update(c_lead)
-        elif lead.left_bower_suit == 'Diamonds':
-            pass
-        elif lead.left_bower_suit == 'Hearts':
-            h_lead.pop('Jack of Hearts')
-            d_clincher.update(h_lead)
-        elif lead.left_bower_suit == 'Spades':
-            d_clincher.update(s_lead)
-        lead.point = d_clincher.get(lead.card_string, 0)
-        for crd in hand:
-            crd.point = d_clincher.get(crd.card_string, 0)
-
-    elif best == 'Hearts':
-        if lead.left_bower_suit == 'Clubs':
-            h_clincher.update(c_lead)
-        elif lead.left_bower_suit == 'Diamonds':
-            d_lead.pop('Jack of Diamonds')
-            h_clincher.update(d_lead)
-        elif lead.left_bower_suit == 'Hearts':
-            pass
-        elif lead.left_bower_suit == 'Spades':
-            h_clincher.update(s_lead)
-        lead.point = h_clincher.get(lead.card_string, 0)
-        for crd in hand:
-            crd.point = h_clincher.get(crd.card_string, 0)
-
-    elif best == 'Spades':
-        if lead.left_bower_suit == 'Clubs':
-            c_lead.pop('Jack of Clubs')
-            s_clincher.update(c_lead)
-        elif lead.left_bower_suit == 'Diamonds':
-            s_clincher.update(d_lead)
-        elif lead.left_bower_suit == 'Hearts':
-            s_clincher.update(h_lead)
-        elif lead.left_bower_suit == 'Spades':
-            pass
-        lead.point = s_clincher.get(lead.card_string, 0)
-        for crd in hand:
-            crd.point = s_clincher.get(crd.card_string, 0)
-    return hand
 
 
 def assign_clincher(best, hand):
@@ -180,10 +77,10 @@ def play_trick(p1, p2, p3, p4, round_leader, best_suit, caller, testing):
 
     played_cards = [lead_card]
 
-    p1.hand = assign_points(p1.hand, best_suit, lead_card)
-    p2.hand = assign_points(p2.hand, best_suit, lead_card)
-    p3.hand = assign_points(p3.hand, best_suit, lead_card)
-    p4.hand = assign_points(p4.hand, best_suit, lead_card)
+    p1.assign_points(best_suit, lead_card)
+    p2.assign_points(best_suit, lead_card)
+    p3.assign_points(best_suit, lead_card)
+    p4.assign_points(best_suit, lead_card)
 
     player_in_lead = round_leader
 
@@ -271,10 +168,10 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
     not testing and print(colored(f'{calling_player.name}: {best_suit} is clincher suit.', 'green'))
     not testing and time.sleep(1.3)
 
-    player1.hand = assign_left_bower(best_suit, player1.hand)
-    player2.hand = assign_left_bower(best_suit, player2.hand)
-    player3.hand = assign_left_bower(best_suit, player3.hand)
-    player4.hand = assign_left_bower(best_suit, player4.hand)
+    player1.assign_left_bower(best_suit)
+    player2.assign_left_bower(best_suit)
+    player3.assign_left_bower(best_suit)
+    player4.assign_left_bower(best_suit)
 
     for _ in range(5):
         player1, player2, player3, player4, ldr_index = play_trick(player1, player2, player3, player4,

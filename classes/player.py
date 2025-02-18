@@ -10,47 +10,62 @@ class Player:
         self.card_values = [0, 0, 0, 0]
         self.tricks_won = 0
 
-    @abstractmethod
+    def assign_left_bower(self, best: str):
+    # This will assign the 'Correct' suit to the odd jack. it always acts as the other suit of the same color
+    # Other names for odd jack: left bower
+
+        for c in self.hand:
+            if best == 'Clubs' and c.card_string == 'Jack of Spades':
+                c.left_bower = True
+                c.left_bower_suit = 'Clubs'
+
+            elif best == 'Diamonds' and c.card_string == 'Jack of Hearts':
+                c.left_bower = True
+                c.left_bower_suit = 'Diamonds'
+
+            elif best == 'Hearts' and c.card_string == 'Jack of Diamonds':
+                c.left_bower = True
+                c.left_bower_suit = 'Hearts'
+
+            elif best == 'Spades' and c.card_string == 'Jack of Clubs':
+                c.left_bower = True
+                c.left_bower_suit = 'Spades'
+            else:
+                pass
+
+    def assign_points(self, best: str, lead: Card):
+        pass
+
     def evaluate_cards(self):
         pass
 
-    @abstractmethod
     def order_up_card(self, suit: str, flipped_c: Card, dealer):
         pass
 
-    @abstractmethod
     def choose_call_suit(self, suit: str, flipped_c: Card):
         pass   
 
-    @abstractmethod
     def must_call_suit(self, suit: str, flipped_c: Card):
         pass   
 
-    @abstractmethod
     def drop_card(self, flipped_c: Card, caller):
         pass   
 
-    @abstractmethod
     def lead_card(self):
         pass   
 
-    @abstractmethod
     def follow_suit(self, lead_c: Card, played: list[Card]):
         pass  
 
-    @abstractmethod
     def choose_suit(self):
         pass
 
-    @abstractmethod
     def play_clincher(self, played: list[Card], calling_player):
         pass    
 
-    @abstractmethod
     def discard_bad_card(self, suit: str):
         pass   
 
-    @abstractmethod
     def choose_card(self):
         pass   
 

@@ -8,6 +8,10 @@ class User(Player):
     # user does not evaluate cards with algorithm
         pass
 
+    def assign_points(self, best, lead):
+    # user does not assign points
+        pass
+
     def order_up_card(self, suit: str, flipped_c: Card, dealer: Player, testing: bool):
     # This allows the user to tell a player whether to pick up the flipped card and call that suit clincher
 
