@@ -12,15 +12,6 @@ from classes.player import Team
 # This is the card game Euchre. Rules: https://bicyclecards.com/how-to-play/euchre/
 # Cards used are 9 up to Ace. 'Going alone' for a round is not a feature of this script
 
-
-def assign_clincher(best, hand):
-    for c in hand:
-        if c.get_suit() == best or c.is_left_bower():
-            c.clincher = True
-        else:
-            pass
-    return hand
-
 def determine_winning_trick_so_far(played):
     # This function determines which played is currently winning the trick, as in who has played the best card so far
     # Used to help the computer make strategic decisions about which card to play
@@ -65,10 +56,10 @@ def play_trick(p1, p2, p3, p4, round_leader, best_suit, caller, testing):
     # and must be followed by other players
     not testing and print(colored(f'\nClincher: {best_suit} ({caller.name})', 'green'))
 
-    p1.hand = assign_clincher(best_suit, p1.hand)
-    p2.hand = assign_clincher(best_suit, p2.hand)
-    p3.hand = assign_clincher(best_suit, p3.hand)
-    p4.hand = assign_clincher(best_suit, p4.hand)
+    p1.assign_clincher(best_suit)
+    p2.assign_clincher(best_suit)
+    p3.assign_clincher(best_suit)
+    p4.assign_clincher(best_suit)
 
     player_map = {1: p1, 2: p2, 3: p3, 4: p4}
     round_order = [round_leader, round_leader % 4 + 1, (round_leader + 1) % 4 + 1, (round_leader + 2) % 4 + 1]

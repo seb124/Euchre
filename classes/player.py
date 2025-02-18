@@ -30,8 +30,11 @@ class Player:
             elif best == 'Spades' and c.card_string == 'Jack of Clubs':
                 c.left_bower = True
                 c.left_bower_suit = 'Spades'
-            else:
-                pass
+
+    def assign_clincher(self, best: str):
+        for c in self.hand:
+            if c.get_suit() == best or c.is_left_bower():
+                c.clincher = True
 
     def assign_points(self, best: str, lead: Card):
         pass
