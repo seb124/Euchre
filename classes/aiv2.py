@@ -92,42 +92,7 @@ class AIV2(Computer):
 
         return best_alternative_val
     
-    def consider_turn_order(self, dealer): # This is nasty, but I didn't find a position var, so doing it manually might be the easiest way
-        adjustment = 0
-        if dealer.name == "Player1":
-            if self.name == "Player1":
-                adjustment += 6
-            elif self.name == "Player2":
-                adjustment -= 3
-            elif self.name == "Player 3":
-                adjustment += 3
-            elif self.name == "Player 4": 
-                adjustment -= 2 
-        elif dealer.name == "Player2":
-            if self.name == "Player1":
-                adjustment -=2
-            elif self.name == "Player2":
-                adjustment += 6
-            elif self.name == "Player 3":
-                adjustment -= 3
-            elif self.name == "Player 4":
-                adjustment += 2
-        elif dealer.name == "Player3":
-            if self.name == "Player1":
-                adjustment += 3
-            elif self.name == "Player2":
-                adjustment -= 2
-            elif self.name == "Player 3":
-                adjustment += 6
-            elif self.name == "Player 4":
-                adjustment -= 3
-        elif dealer.name == "Player4":
-            if self.name == "Player1":
-                adjustment -= 3
-            elif self.name == "Player2":
-                adjustment += 3
-            elif self.name == "Player 3":
-                adjustment -= 2
-            elif self.name == "Player 4":
-                adjustment += 6
-        return adjustment
+    def consider_turn_order(self, dealer):
+        position_adjustment = {1: -3, 2: 3, 3: -2, 4: 6}
+        player_order = [((dealer + i) % 4) + 1 for i in range(3)] + [dealer]
+        return position_adjustment[player_order[player_order.index(self.number - 1)]]
