@@ -5,10 +5,6 @@ from classes.player import Player
 class Computer(Player):
 
     POINTS_TO_CALL_SUIT = 30
-    # At the start of each round, initialize the PT for each player
-    def __init__(self, number):
-        super().__init__(number)
-        
 
 
     def assign_points(self, best: str, lead: Card):
