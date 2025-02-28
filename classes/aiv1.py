@@ -4,22 +4,22 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from classes.computer import Computer
 from classes.cards import Card
 from classes.player import Player
+from classes.cards import Deck
+
 
 class AIV1(Computer):
-    # update functions as needed - for example, change the order_up_card function to change how this AI behaves when its called in engine.py
-    # right now, it's the exact same as the Naive AI "Computer" class
-
-    POINTS_TO_CALL_SUIT = 30
     # At the start of each round, initialize the PT for each player
     def __init__(self, number):
         super().__init__(number)
-        
+        deck = Deck()
+        card_list = deck.build()
+
         # Probability table for opponents (keys: player numbers, values: probability distributions)
         self.PT = {
-            2: [1/3 for _ in range(24)],  # Equal probability distribution initially
-            3: [1/3 for _ in range(24)],
-            4: [1/3 for _ in range(24)]
+            player: {card: 1/3 for card in card_list}  # Equal probability distribution initially
+            for player in [1, 2, 3, 4] if player != self.number
         }
+
 
     def update_probability_table(self, player_num: int, action: str, trump_suit: str):
         """
@@ -86,33 +86,94 @@ class AIV1(Computer):
                 self.PT[p] = [x / total for x in self.PT[p]]  # Normalize probabilities
 
 
-
-    
     def order_up_card(self, suit: str, flipped_c: Card, dealer: Player, testing: bool):
-        """
-        Determines whether the AI should order the dealer to pick up the card.
-        Updates probability tables based on the AI's decision.
-        """
-        suit_dict = {'Clubs': 0, 'Diamonds': 1, 'Hearts': 2, 'Spades': 3}
-        suit_idx = suit_dict.get(flipped_c.suit)
+        teammate_number = ((self.number + 1) % 4) + 1
+        opponent_numbers = [p for p in [1, 2, 3, 4] if p not in [self.number, teammate_number]]
+        high_value_cards = self.get_high_value_cards(suit)
+        teammate_trump_prob = sum(self.PT[teammate_number][card] for card in high_value_cards)
+        opponent_trump_prob = sum(self.PT[opponent_numbers[0]][card] for card in high_value_cards) + sum(self.PT[opponent_numbers[1]][card] for card in high_value_cards)
 
-        if self.card_values[suit_idx] >= self.POINTS_TO_CALL_SUIT:
+        picked_value = self.eval_trump_choice(teammate_trump_prob, opponent_trump_prob, suit)
+        passed_value = self.eval_alternative(suit)
+
+        if picked_value > passed_value: # I tried > vs >= and > is muchhhh better than >= actually
             suit = flipped_c.suit
-            was_card_picked_up = True
+            was_card_picked  = True
             caller = self
             dealer.drop_card(flipped_c, self)
-            
-            # Update probabilities: AI is more likely to have strong trump cards
-            for player in self.PT:
-                self.update_probability_table(player, "call", flipped_c.suit)
-        
         else:
-            was_card_picked_up = False
+            was_card_picked = False
             caller = None
             not testing and print(f'{self.name}: Pass')
+        return self, suit, was_card_picked, dealer, caller
+    
+    def get_high_value_cards(self, suit):
+        high_value_cards = []
+        for card in self.hand:
+            if suit == "Clubs":
+                if card == "Jack of Clubs" or "Jack of Spades" or "Ace of Clubs":
+                    high_value_cards.append(card)
+            elif suit == "Spades":
+                if card == "Jack of Clubs" or "Jack of Spades" or "Ace of Spades":
+                    high_value_cards.append(card)
+            elif suit == "Diamonds":
+                if card == "Jack of Diamonds" or "Jack of Hearts" or "Ace of Diamonds":
+                    high_value_cards.append(card)
+            elif suit == "Hearts":
+                if card == "Jack of Diamonds" or "Jack of Hearts" or "Ace of Hearts":
+                    high_value_cards.append(card)
+        
+        return high_value_cards
+    
+    def eval_trump_choice(self, teammate_trump_prob, opponent_trump_prob, suit):
+        return (self.card_weight(suit) 
+                + teammate_trump_prob * self.calculate_bonus_penalty(teammate_trump_prob)
+                - (opponent_trump_prob * self.calculate_bonus_penalty(opponent_trump_prob)))
+    
+    def evaluate_cards(self):
+        return super().evaluate_cards()
 
-            # Update probabilities: AI is less likely to have strong trump cards
-            for player in self.PT:
-                self.update_probability_table(player, "pass", flipped_c.suit)
+    def card_weight(self, suit):
+        weights = self.evaluate_cards()
+        if suit == "Clubs":
+            return weights[0]
+        elif suit == "Spades":
+            return weights[3]
+        elif suit == "Diamonds":
+            return weights[1]
+        elif suit == "Hearts":
+            return weights[2]
+        else:
+            return 0
+    
+    def calculate_bonus_penalty(self, probability):
+        if probability > 0.8:
+            return 10
+        elif probability > 0.5:
+            return 5
+        else:
+            return 0
+    
+    def eval_alternative(self, suit):
+        best_alternative_val = 0
+        best_suit = None
 
-        return self, suit, was_card_picked_up, dealer, caller
+        for suit_type in ["Clubs", "Spades", "Diamonds", "Hearts"]:
+            if suit_type is suit:
+                continue
+
+            teammate_number = ((self.number + 1) % 4) + 1
+            opponent_numbers = [p for p in [1, 2, 3, 4] if p not in [self.number, teammate_number]]
+            high_value_cards = self.get_high_value_cards(suit)
+            teammate_trump_prob = sum(self.PT[teammate_number][card] for card in high_value_cards)
+            opponent_trump_prob = sum(self.PT[opponent_numbers[0]][card] for card in high_value_cards) + sum(self.PT[opponent_numbers[1]][card] for card in high_value_cards)
+            
+            value = (self.card_weight(suit) 
+                + (teammate_trump_prob * self.calculate_bonus_penalty(teammate_trump_prob)) 
+                - (opponent_trump_prob * self.calculate_bonus_penalty(opponent_trump_prob)))
+
+            if value > best_alternative_val:
+                best_alternative_val = value
+                best_suit = suit
+
+        return best_alternative_val
