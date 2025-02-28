@@ -94,7 +94,7 @@ class AIV1(Computer):
         opponent_trump_prob = sum(self.PT[opponent_numbers[0]][card] for card in high_value_cards) + sum(self.PT[opponent_numbers[1]][card] for card in high_value_cards)
 
         picked_value = self.eval_trump_choice(teammate_trump_prob, opponent_trump_prob, suit)
-        passed_value = self.eval_alternative(flipped_c, self.hand)
+        passed_value = self.eval_alternative(suit)
 
         if picked_value > passed_value: # I tried > vs >= and > is muchhhh better than >= actually
             suit = flipped_c.suit
@@ -154,7 +154,7 @@ class AIV1(Computer):
         else:
             return 0
     
-    def eval_alternative(self, suit, hand):
+    def eval_alternative(self, suit):
         best_alternative_val = 0
         best_suit = None
 
