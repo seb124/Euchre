@@ -1,24 +1,25 @@
-from classes.cards import Card
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from classes.computer import Computer
 from classes.cards import Card
 from classes.player import Player
+from classes.cards import Deck
 
 
 class AIV1(Computer):
-    # update functions as needed - for example, change the order_up_card function to change how this AI behaves when its called in engine.py
-    # right now, it's the exact same as the Naive AI "Computer" class
-
-    POINTS_TO_CALL_SUIT = 30
     # At the start of each round, initialize the PT for each player
     def __init__(self, number):
         super().__init__(number)
-        
+        deck = Deck()
+        card_list = deck.build()
+
         # Probability table for opponents (keys: player numbers, values: probability distributions)
         self.PT = {
-            2: [1/3 for _ in range(24)],  # Equal probability distribution initially
-            3: [1/3 for _ in range(24)],
-            4: [1/3 for _ in range(24)]
+            player: {card: 1/3 for card in card_list}  # Equal probability distribution initially
+            for player in [1, 2, 3, 4] if player != self.number
         }
+
 
     def update_probability_table(self, player_num: int, action: str, trump_suit: str):
         """
@@ -85,17 +86,17 @@ class AIV1(Computer):
                 self.PT[p] = [x / total for x in self.PT[p]]  # Normalize probabilities
 
 
-
-    
     def order_up_card(self, suit: str, flipped_c: Card, dealer: Player, testing: bool):
-        high_value_cards = self.get_high_value_cards(self.hand, suit)
-        teammate_trump_prob = sum(pT3[card] for card in high_value_cards)
-        opponent_trump_prob = sum(pT2[card] for card in high_value_cards) + sum(pT4[card] for card in high_value_cards)
+        teammate_number = ((self.number + 1) % 4) + 1
+        opponent_numbers = [p for p in [1, 2, 3, 4] if p not in [self.number, teammate_number]]
+        high_value_cards = self.get_high_value_cards(suit)
+        teammate_trump_prob = sum(self.PT[teammate_number][card] for card in high_value_cards)
+        opponent_trump_prob = sum(self.PT[opponent_numbers[0]][card] for card in high_value_cards) + sum(self.PT[opponent_numbers[1]][card] for card in high_value_cards)
 
         picked_value = self.eval_trump_choice(teammate_trump_prob, opponent_trump_prob, suit)
         passed_value = self.eval_alternative(flipped_c, self.hand)
 
-        if picked_value >= passed_value: # Can potentially play around with >= or >
+        if picked_value > passed_value: # I tried > vs >= and > is muchhhh better than >= actually
             suit = flipped_c.suit
             was_card_picked  = True
             caller = self
@@ -106,9 +107,9 @@ class AIV1(Computer):
             not testing and print(f'{self.name}: Pass')
         return self, suit, was_card_picked, dealer, caller
     
-    def get_high_value_cards(hand, suit):
+    def get_high_value_cards(self, suit):
         high_value_cards = []
-        for card in hand:
+        for card in self.hand:
             if suit == "Clubs":
                 if card == "Jack of Clubs" or "Jack of Spades" or "Ace of Clubs":
                     high_value_cards.append(card)
@@ -126,8 +127,11 @@ class AIV1(Computer):
     
     def eval_trump_choice(self, teammate_trump_prob, opponent_trump_prob, suit):
         return (self.card_weight(suit) 
-                + (teammate_trump_prob * self.calculate_bonus_penalty(teammate_trump_prob)) 
+                + teammate_trump_prob * self.calculate_bonus_penalty(teammate_trump_prob)
                 - (opponent_trump_prob * self.calculate_bonus_penalty(opponent_trump_prob)))
+    
+    def evaluate_cards(self):
+        return super().evaluate_cards()
 
     def card_weight(self, suit):
         weights = self.evaluate_cards()
@@ -139,8 +143,10 @@ class AIV1(Computer):
             return weights[1]
         elif suit == "Hearts":
             return weights[2]
+        else:
+            return 0
     
-    def calculate_bonus_penalty(probability):
+    def calculate_bonus_penalty(self, probability):
         if probability > 0.8:
             return 10
         elif probability > 0.5:
@@ -155,10 +161,13 @@ class AIV1(Computer):
         for suit_type in ["Clubs", "Spades", "Diamonds", "Hearts"]:
             if suit_type is suit:
                 continue
-            high_value_cards = self.get_high_value_cards(hand, suit)
-            teammate_trump_prob = sum(pT3[card] for card in high_value_cards)
-            opponent_trump_prob = sum(pT2[card] for card in high_value_cards) + sum(pT4[card] for card in high_value_cards)
 
+            teammate_number = ((self.number + 1) % 4) + 1
+            opponent_numbers = [p for p in [1, 2, 3, 4] if p not in [self.number, teammate_number]]
+            high_value_cards = self.get_high_value_cards(suit)
+            teammate_trump_prob = sum(self.PT[teammate_number][card] for card in high_value_cards)
+            opponent_trump_prob = sum(self.PT[opponent_numbers[0]][card] for card in high_value_cards) + sum(self.PT[opponent_numbers[1]][card] for card in high_value_cards)
+            
             value = (self.card_weight(suit) 
                 + (teammate_trump_prob * self.calculate_bonus_penalty(teammate_trump_prob)) 
                 - (opponent_trump_prob * self.calculate_bonus_penalty(opponent_trump_prob)))
