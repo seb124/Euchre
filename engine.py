@@ -6,9 +6,6 @@ from classes.computer import Computer
 from classes.user import User
 from classes.player import Team
 
-
-# TODO: make main function that can read JSON file (config.json) and call play_game with those args - makes it really easy to test
-
 # This is the card game Euchre. Rules: https://bicyclecards.com/how-to-play/euchre/
 # Cards used are 9 up to Ace. 'Going alone' for a round is not a feature of this script
 
@@ -222,21 +219,3 @@ def play_game(p1, p2, p3, p4, testing):
         elif team_2.points >= 11:
             not testing and print(f'You lose the game! Final Score: {team_1.points}-{team_2.points}')
             return "Team 2"
-
-
-def main():
-    # prompt user for testing or not
-    val = input("Enter \"t\" if you would like to test the AI. ")
-    testing = True if val == "t" else False
-
-    if testing:
-        wins = {"Team 1": 0, "Team 2": 0}
-        for _ in range(0, 1000):
-            winning_team = play_game(Computer(1), Computer(2), Computer(3), Computer(4), testing=True)
-            wins[winning_team] += 1
-        print(wins)
-    else:
-        play_game(User(1), Computer(2), Computer(3), Computer(4), testing=False)
-
-if __name__ == "__main__":
-    main()
