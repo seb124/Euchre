@@ -6,7 +6,6 @@ class Computer(Player):
 
     POINTS_TO_CALL_SUIT = 30
 
-
     def assign_points(self, best: str, lead: Card):
     # This is called at the start of every round after the 1st card is played
     # This gives point values to every card that could potentially win the round (clincher > suit of 1st card)
