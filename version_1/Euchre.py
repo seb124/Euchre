@@ -8,7 +8,11 @@ from termcolor import colored
 # Human player is player 1. Player 3 is your teammate
 
 # Define our classes: Card, Deck, Player & Team
-#test
+
+# This variable determines how aggressive a computer player will be when calling suit.
+# If their hand has 30+ points in a given suit, they will call it clincher
+POINTS_TO_CALL_SUIT = 30
+
 
 class Card:
     def __init__(self, suit, rank, point, left_bower, left_bower_suit, owner, display, card_string, clincher=False):
@@ -151,26 +155,6 @@ class Team:
         self.player_b = player_b
         self.points = points
         self.tricks = tricks
-
-
-# This variable determines how aggressive a computer player will be when calling suit.
-# If their hand has 30+ points in a given suit, they will call it clincher
-points_to_call_suit = 30
-
-# Create the 4 players and the deck out of the 24 possible cards.
-# Randomly assign 5 cards to each player (no repeats)
-# Flip one remaining card
-
-d = Deck()
-d.show()
-
-player_1 = Player(1)
-player_2 = Player(2)
-player_3 = Player(3)
-player_4 = Player(4)
-
-team_1 = Team(player_1, player_3, 0, 0)
-team_2 = Team(player_2, player_4, 0, 0)
 
 
 def user_order_up_card(p, flipped_c, suit, dealer_):
@@ -373,11 +357,11 @@ def user_drop_card(dealer_, flipped_c, caller_):
             print(f'\nInvalid Input. Please enter a number between 1-{num_cards}\n')
 
 
-def computer_order_up_card(p, flipped_c, suit, dealer_, pts_to_call_suit):
+def computer_order_up_card(p, flipped_c, suit, dealer_, pts_to_call_suit, testing=False):
     # This function gives the computer the option to tell the dealer to pick up the card.
     # If the user is the dealer, it calls the user_drop_card function. Otherwise, it will discard a non-clincher
     # Card of low rank from the dealers had
-    # Aggressiveness of computer ordering up card depends on points_to_call_suit integer
+    # Aggressiveness of computer ordering up card depends on POINTS_TO_CALL_SUIT integer
     discard = None
     ranks = ['9', '10', 'Jack', 'Queen', 'King', 'Ace']
 
@@ -387,7 +371,7 @@ def computer_order_up_card(p, flipped_c, suit, dealer_, pts_to_call_suit):
         suit = flipped_c.suit
         was_card_picked_up = True
         caller = p
-        if dealer_.name == 'Player1':  # If player1 is the dealer, then the user has option of which card to drop
+        if not testing and dealer_.name == 'Player1':  # If player1 is the dealer, then the user has option of which card to drop
             dealer_ = user_drop_card(dealer_, flipped_c, p)
         else:  # If players 2-4 are dealer, make dealer choose lowest off-suit card to drop
             dealer_.hand.append(flipped_c)
@@ -408,14 +392,14 @@ def computer_order_up_card(p, flipped_c, suit, dealer_, pts_to_call_suit):
     else:
         was_card_picked_up = False
         caller = None
-        print(f'{p.name}: Pass')
+        not testing and print(f'{p.name}: Pass')
     return p, suit, was_card_picked_up, dealer_, caller
 
 
-def computer_pick_up_card(p, flipped_c, suit, pts_to_call_suit):
+def computer_pick_up_card(p, flipped_c, suit, pts_to_call_suit, testing):
     # This adds the point value of the flipped card to the appropriate suit points for the cards in the dealers hand
     # Ex. if the 9 of Diamonds is flipped, the dealers hand gains 7 points for diamonds card_values
-    # Dealer will pick up the card if that suit has >= points in card_values[] than the points_to_call_suit variable
+    # Dealer will pick up the card if that suit has >= points in card_values[] than the POINTS_TO_CALL_SUIT variable
     discard = None
     was_card_picked_up = False
     caller = None
@@ -443,30 +427,30 @@ def computer_pick_up_card(p, flipped_c, suit, pts_to_call_suit):
             p.hand.pop(p.hand.index(discard))
         except ValueError:  # If the dealer has no non-clincher cards to discard, discard a random one
             len_hand = len(p.hand)
-            p.hand.pop(random.randint(0, len_hand))
+            p.hand.pop(random.randint(0, len_hand - 1))
     else:
-        print(f'{p.name}: Pass')
+        not testing and print(f'{p.name}: Pass')
 
     return p, suit, was_card_picked_up, caller
 
 
-def computer_choose_call_suit(p, flipped_c, suit, pts_to_call_suit):
+def computer_choose_call_suit(p, flipped_c, suit, pts_to_call_suit, testing):
     # This will give the computer the option to call suit after everyone has refused to call the suit of flipped card
-    # It will only call suit if the player has more pts in that suit than the variable points_to_call_suit
+    # It will only call suit if the player has more pts in that suit than the variable POINTS_TO_CALL_SUIT
 
     was_suit_declared = False
     suits = ['Clubs', 'Diamonds', 'Hearts', 'Spades']
     best_suit_idx = p.card_values.index(max(p.card_values))
     if p.card_values[best_suit_idx] < pts_to_call_suit:
         caller = None
-        print(f'{p.name}: Pass')
+        not testing and print(f'{p.name}: Pass')
         pass
     elif suits[best_suit_idx] == flipped_c.suit:  # Comp may not call suit that was turned down earlier
         p.card_values[best_suit_idx] = 0
         second_best_suit_idx = p.card_values.index(max(p.card_values))
         if p.card_values[second_best_suit_idx] < pts_to_call_suit:
             caller = None
-            print(f'{p.name}: Pass')
+            not testing and print(f'{p.name}: Pass')
             pass
         else:
             was_suit_declared = True
@@ -858,27 +842,28 @@ def assign_point_trick_winner(winning_play, play1, play2, play3, play4):
     return play1, play2, play3, play4
 
 
-def determine_trick_winner(played):
+def determine_trick_winner(played, testing):
     # After all 4 cards are played, this function finds the one with the highest point value. that card wins the trick
     # and the winning player (owner of that card) is returned
     cards_points = {}
     for c in played:
         cards_points[c] = c.point
-    print('\n')
-    for crd in cards_points:
-        print(f'{crd.display} (P{crd.owner})')
-        time.sleep(.4)
-    time.sleep(1)
+    if not testing:
+        print('\n')
+        for crd in cards_points:
+            print(f'{crd.display} (P{crd.owner})')
+            time.sleep(.4)
+        time.sleep(1)
     winning_card = max(cards_points, key=cards_points.get)
     winner = winning_card.owner
-    print(f'\nPlayer{winner} won with the {winning_card.display}')
+    not testing and print(f'\nPlayer{winner} won with the {winning_card.display}')
     return winner
 
 
-def play_trick(p1, p2, p3, p4, round_leader, best_suit, caller):
+def play_trick(p1, p2, p3, p4, round_leader, best_suit, caller, testing):
     # The user can now play a card by choosing the index (1-5) of the card to play. That suit is lead
     # and must be followed by other players
-    print(colored(f'\nClincher: {best_suit} ({caller.name})', 'green'))
+    not testing and print(colored(f'\nClincher: {best_suit} ({caller.name})', 'green'))
 
     p1.hand = assign_clincher(best_suit, p1.hand)
     p2.hand = assign_clincher(best_suit, p2.hand)
@@ -886,7 +871,7 @@ def play_trick(p1, p2, p3, p4, round_leader, best_suit, caller):
     p4.hand = assign_clincher(best_suit, p4.hand)
 
     if round_leader == 1:
-        lead_card, p1.hand = user_lead_card(p1.hand)
+        lead_card, p1.hand = user_lead_card(p1.hand) if not testing else computer_lead_card(p1.hand)
     elif round_leader == 2:
         lead_card, p2.hand = computer_lead_card(p2.hand)
     elif round_leader == 3:
@@ -902,7 +887,7 @@ def play_trick(p1, p2, p3, p4, round_leader, best_suit, caller):
     p3.hand = assign_points(p3.hand, best_suit, lead_card)
     p4.hand = assign_points(p4.hand, best_suit, lead_card)
 
-    time.sleep(1.75)
+    not testing and time.sleep(1.75)
     if round_leader == 1:
         player_in_lead = 1
         try:
@@ -968,22 +953,34 @@ def play_trick(p1, p2, p3, p4, round_leader, best_suit, caller):
                 p4_card, p4.hand = computer_discard_bad_card(p4.hand, best_suit)
 
         played_cards.append(p4_card)
+        player_in_lead = determine_winning_trick_so_far(played_cards)
 
         try:
-            print('\nThe cards played so far are: ')
-            for pc in played_cards:
-                time.sleep(.4)
-                print(f'{pc.display} (P{pc.owner})')
-            time.sleep(1)
-            print('\nYour hand is: \n')
-            for c in p1.hand:
-                print(c.display)
-            p1_card, p1.hand = user_follow_suit(lead_card, p1.hand, played_cards)
+            if not testing:
+                print('\nThe cards played so far are: ')
+                for pc in played_cards:
+                    time.sleep(.4)
+                    print(f'{pc.display} (P{pc.owner})')
+                time.sleep(1)
+                print('\nYour hand is: \n')
+                for c in p1.hand:
+                    print(c.display)
+            p1_card, p1.hand = user_follow_suit(lead_card, p1.hand, played_cards) if not testing else computer_follow_suit(lead_card, p1.hand, played_cards)
         except ValueError:
-            p1_card, p1.hand = user_choose_card(p1.hand)
+            if not testing:
+                p1_card, p1.hand = user_choose_card(p1.hand)
+            else:
+                try:
+                    if player_in_lead == 3:
+                        raise ValueError
+                    else:
+                        p1_card, p1.hand = computer_play_clincher(p1.hand, played_cards, player_in_lead, caller)                
+                except ValueError:
+                    p1_card, p1.hand = computer_discard_bad_card(p1.hand, best_suit)
 
         played_cards.append(p1_card)
-
+        player_in_lead = determine_winning_trick_so_far(played_cards)
+    
     elif round_leader == 3:
         player_in_lead = 3
         try:
@@ -995,19 +992,30 @@ def play_trick(p1, p2, p3, p4, round_leader, best_suit, caller):
                 p4_card, p4.hand = computer_discard_bad_card(p4.hand, best_suit)
 
         played_cards.append(p4_card)
+        player_in_lead = determine_winning_trick_so_far(played_cards)
 
         try:
-            print('\nThe cards played so far are: ')
-            for pc in played_cards:
-                time.sleep(.4)
-                print(f'{pc.display} (P{pc.owner})')
-            time.sleep(1)
-            print('\nYour hand is: \n')
-            for c in p1.hand:
-                print(c.display)
-            p1_card, p1.hand = user_follow_suit(lead_card, p1.hand, played_cards)
+            if not testing:
+                print('\nThe cards played so far are: ')
+                for pc in played_cards:
+                    time.sleep(.4)
+                    print(f'{pc.display} (P{pc.owner})')
+                time.sleep(1)
+                print('\nYour hand is: \n')
+                for c in p1.hand:
+                    print(c.display)
+            p1_card, p1.hand = user_follow_suit(lead_card, p1.hand, played_cards) if not testing else computer_follow_suit(lead_card, p1.hand, played_cards)
         except ValueError:
-            p1_card, p1.hand = user_choose_card(p1.hand)
+            if not testing:
+                p1_card, p1.hand = user_choose_card(p1.hand)
+            else:
+                try:
+                    if player_in_lead == 3:
+                        raise ValueError
+                    else:
+                        p1_card, p1.hand = computer_play_clincher(p1.hand, played_cards, player_in_lead, caller)
+                except ValueError:
+                    p1_card, p1.hand = computer_discard_bad_card(p1.hand, best_suit)
 
         played_cards.append(p1_card)
         player_in_lead = determine_winning_trick_so_far(played_cards)
@@ -1028,18 +1036,24 @@ def play_trick(p1, p2, p3, p4, round_leader, best_suit, caller):
     elif round_leader == 4:
         player_in_lead = 4
         try:
-            print('\nThe cards played so far are: ')
-            for pc in played_cards:
-                time.sleep(.4)
-                print(f'{pc.display} (P{pc.owner})')
-            time.sleep(1)
-            print('\nYour hand is: \n')
-            for c in p1.hand:
-                print(c.display)
-
-            p1_card, p1.hand = user_follow_suit(lead_card, p1.hand, played_cards)
+            if not testing:
+                print('\nThe cards played so far are: ')
+                for pc in played_cards:
+                    time.sleep(.4)
+                    print(f'{pc.display} (P{pc.owner})')
+                time.sleep(1)
+                print('\nYour hand is: \n')
+                for c in p1.hand:
+                    print(c.display)
+            p1_card, p1.hand = user_follow_suit(lead_card, p1.hand, played_cards) if not testing else computer_follow_suit(lead_card, p1.hand, played_cards)
         except ValueError:
-            p1_card, p1.hand = user_choose_card(p1.hand)
+            if not testing:
+                p1_card, p1.hand = user_choose_card(p1.hand)
+            else:
+                try:
+                    p1_card, p1.hand = computer_play_clincher(p1.hand, played_cards, player_in_lead, caller)                
+                except ValueError:
+                    p1_card, p1.hand = computer_discard_bad_card(p1.hand, best_suit)
 
         played_cards.append(p1_card)
         player_in_lead = determine_winning_trick_so_far(played_cards)
@@ -1071,18 +1085,18 @@ def play_trick(p1, p2, p3, p4, round_leader, best_suit, caller):
 
         played_cards.append(p3_card)
 
-    winning_player = determine_trick_winner(played_cards)
+    winning_player = determine_trick_winner(played_cards, testing)
 
     p1, p2, p3, p4 = assign_point_trick_winner(winning_player, p1, p2, p3, p4)
 
-    print(colored(f'\nRound Score: {p1.tricks_won + p3.tricks_won}-{p2.tricks_won + p4.tricks_won}', 'green'))
+    not testing and print(colored(f'\nRound Score: {p1.tricks_won + p3.tricks_won}-{p2.tricks_won + p4.tricks_won}', 'green'))
 
     return p1, p2, p3, p4, winning_player
 
 
-def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index, dlr, ldr_index):
+def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index, dlr, ldr_index, testing):
     #  This function runs each round of Euchre and will be looped over until enough points are scored (11 by 1 team)
-    deck.show()
+    not testing and deck.show()
     deck.deal_cards(player1)
     deck.deal_cards(player2)
     deck.deal_cards(player3)
@@ -1095,8 +1109,8 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
 
     flipped_card = deck.flip_card()
 
-    print(f'\nDealer: {dlr.name}\nFlipped: {flipped_card.display}\n')
-    time.sleep(1.5)
+    not testing and print(f'\nDealer: {dlr.name}\nFlipped: {flipped_card.display}\n')
+    not testing and time.sleep(1.5)
 
     best_suit = ''
 
@@ -1112,30 +1126,30 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
     if dlr_index == 4:
         while True:
             player1, best_suit, was_suit_picked, player4, calling_player = \
-                user_order_up_card(player1, flipped_card, best_suit, player4)
+                user_order_up_card(player1, flipped_card, best_suit, player4) if not testing else computer_order_up_card(player1, flipped_card, best_suit, player4, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             player2, best_suit, was_suit_picked, player4, calling_player = \
-                computer_order_up_card(player2, flipped_card, best_suit, player4, points_to_call_suit)
+                computer_order_up_card(player2, flipped_card, best_suit, player4, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             player3, best_suit, was_suit_picked, player4, calling_player = \
-                computer_order_up_card(player3, flipped_card, best_suit, player4, points_to_call_suit)
+                computer_order_up_card(player3, flipped_card, best_suit, player4, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             player4, best_suit, was_suit_picked, calling_player = \
-                computer_pick_up_card(player4, flipped_card, best_suit, points_to_call_suit)
+                computer_pick_up_card(player4, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
-            best_suit, was_suit_picked, calling_player = user_choose_call_suit(player1, flipped_card, best_suit)
-            if was_suit_picked:
-                break
-            best_suit, was_suit_picked, calling_player = \
-                computer_choose_call_suit(player2, flipped_card, best_suit, points_to_call_suit)
+            best_suit, was_suit_picked, calling_player = user_choose_call_suit(player1, flipped_card, best_suit) if not testing else computer_choose_call_suit(player1, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             best_suit, was_suit_picked, calling_player = \
-                computer_choose_call_suit(player3, flipped_card, best_suit, points_to_call_suit)
+                computer_choose_call_suit(player2, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
+            if was_suit_picked:
+                break
+            best_suit, was_suit_picked, calling_player = \
+                computer_choose_call_suit(player3, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             best_suit, was_suit_picked, calling_player = computer_must_call_suit(player4, flipped_card, best_suit)
@@ -1145,63 +1159,63 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
     elif dlr_index == 1:
         while True:
             player2, best_suit, was_suit_picked, player1, calling_player = \
-                computer_order_up_card(player2, flipped_card, best_suit, player1, points_to_call_suit)
+                computer_order_up_card(player2, flipped_card, best_suit, player1, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             player3, best_suit, was_suit_picked, player1, calling_player = \
-                computer_order_up_card(player3, flipped_card, best_suit, player1, points_to_call_suit)
+                computer_order_up_card(player3, flipped_card, best_suit, player1, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             player4, best_suit, was_suit_picked, player1, calling_player = \
-                computer_order_up_card(player4, flipped_card, best_suit, player1, points_to_call_suit)
+                computer_order_up_card(player4, flipped_card, best_suit, player1, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
-            player1, best_suit, was_suit_picked, calling_player = user_pick_up_card(player1, flipped_card, best_suit)
-            if was_suit_picked:
-                break
-            best_suit, was_suit_picked, calling_player = \
-                computer_choose_call_suit(player2, flipped_card, best_suit, points_to_call_suit)
+            player1, best_suit, was_suit_picked, calling_player = user_pick_up_card(player1, flipped_card, best_suit) if not testing else computer_pick_up_card(player1, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             best_suit, was_suit_picked, calling_player = \
-                computer_choose_call_suit(player3, flipped_card, best_suit, points_to_call_suit)
+                computer_choose_call_suit(player2, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             best_suit, was_suit_picked, calling_player = \
-                computer_choose_call_suit(player4, flipped_card, best_suit, points_to_call_suit)
+                computer_choose_call_suit(player3, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
-            best_suit, was_suit_picked, calling_player = user_must_call_suit(player1, best_suit, flipped_card)
+            best_suit, was_suit_picked, calling_player = \
+                computer_choose_call_suit(player4, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
+                break
+            best_suit, was_suit_picked, calling_player = user_must_call_suit(player1, best_suit, flipped_card) if not testing else computer_must_call_suit(player1, flipped_card, best_suit)
+            if was_suit_picked: 
                 break
 
     elif dlr_index == 2:
         while True:
             player3, best_suit, was_suit_picked, player2, calling_player = \
-                computer_order_up_card(player3, flipped_card, best_suit, player2, points_to_call_suit)
+                computer_order_up_card(player3, flipped_card, best_suit, player2, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             player4, best_suit, was_suit_picked, player2, calling_player = \
-                computer_order_up_card(player4, flipped_card, best_suit, player2, points_to_call_suit)
+                computer_order_up_card(player4, flipped_card, best_suit, player2, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             player1, best_suit, was_suit_picked, player2, calling_player = \
-                user_order_up_card(player1, flipped_card, best_suit, player2)
+                user_order_up_card(player1, flipped_card, best_suit, player2) if not testing else computer_order_up_card(player1, flipped_card, best_suit, player2, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             player2, best_suit, was_suit_picked, calling_player = \
-                computer_pick_up_card(player2, flipped_card, best_suit, points_to_call_suit)
+                computer_pick_up_card(player2, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             best_suit, was_suit_picked, calling_player = \
-                computer_choose_call_suit(player3, flipped_card, best_suit, points_to_call_suit)
+                computer_choose_call_suit(player3, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             best_suit, was_suit_picked, calling_player = \
-                computer_choose_call_suit(player4, flipped_card, best_suit, points_to_call_suit)
+                computer_choose_call_suit(player4, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
-            best_suit, was_suit_picked, calling_player = user_choose_call_suit(player1, flipped_card, best_suit)
+            best_suit, was_suit_picked, calling_player = user_choose_call_suit(player1, flipped_card, best_suit) if not testing else computer_choose_call_suit(player1, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             best_suit, was_suit_picked, calling_player = computer_must_call_suit(player2, flipped_card, best_suit)
@@ -1211,30 +1225,30 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
     elif dlr_index == 3:
         while True:
             player4, best_suit, was_suit_picked, player3, calling_player = \
-                computer_order_up_card(player4, flipped_card, best_suit, player3, points_to_call_suit)
+                computer_order_up_card(player4, flipped_card, best_suit, player3, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             player1, best_suit, was_suit_picked, player3, calling_player = \
-                user_order_up_card(player1, flipped_card, best_suit, player3)
+                user_order_up_card(player1, flipped_card, best_suit, player3) if not testing else computer_order_up_card(player1, flipped_card, best_suit, player3, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             player2, best_suit, was_suit_picked, player3, calling_player = \
-                computer_order_up_card(player2, flipped_card, best_suit, player3, points_to_call_suit)
+                computer_order_up_card(player2, flipped_card, best_suit, player3, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             player3, best_suit, was_suit_picked, calling_player = \
-                computer_pick_up_card(player3, flipped_card, best_suit, points_to_call_suit)
+                computer_pick_up_card(player3, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             best_suit, was_suit_picked, calling_player = \
-                computer_choose_call_suit(player4, flipped_card, best_suit, points_to_call_suit)
+                computer_choose_call_suit(player4, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
-            best_suit, was_suit_picked, calling_player = user_choose_call_suit(player1, flipped_card, best_suit)
+            best_suit, was_suit_picked, calling_player = user_choose_call_suit(player1, flipped_card, best_suit) if not testing else computer_choose_call_suit(player1, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             best_suit, was_suit_picked, calling_player = \
-                computer_choose_call_suit(player2, flipped_card, best_suit, points_to_call_suit)
+                computer_choose_call_suit(player2, flipped_card, best_suit, POINTS_TO_CALL_SUIT, testing)
             if was_suit_picked:
                 break
             best_suit, was_suit_picked, calling_player = computer_must_call_suit(player3, flipped_card, best_suit)
@@ -1250,8 +1264,8 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
     for c in player4.hand:
         c.owner = 4
 
-    print(colored(f'{calling_player.name}: {best_suit} is clincher suit.', 'green'))
-    time.sleep(1.3)
+    not testing and print(colored(f'{calling_player.name}: {best_suit} is clincher suit.', 'green'))
+    not testing and time.sleep(1.3)
 
     player1.hand = assign_left_bower(best_suit, player1.hand)
     player2.hand = assign_left_bower(best_suit, player2.hand)
@@ -1259,15 +1273,15 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
     player4.hand = assign_left_bower(best_suit, player4.hand)
 
     player1, player2, player3, player4, ldr_index = play_trick(player1, player2, player3, player4,
-                                                               ldr_index, best_suit, calling_player)
+                                                               ldr_index, best_suit, calling_player, testing)
     player1, player2, player3, player4, ldr_index = play_trick(player1, player2, player3, player4,
-                                                               ldr_index, best_suit, calling_player)
+                                                               ldr_index, best_suit, calling_player, testing)
     player1, player2, player3, player4, ldr_index = play_trick(player1, player2, player3, player4,
-                                                               ldr_index, best_suit, calling_player)
+                                                               ldr_index, best_suit, calling_player, testing)
     player1, player2, player3, player4, ldr_index = play_trick(player1, player2, player3, player4,
-                                                               ldr_index, best_suit, calling_player)
+                                                               ldr_index, best_suit, calling_player, testing)
     player1, player2, player3, player4, ldr_index = play_trick(player1, player2, player3, player4,
-                                                               ldr_index, best_suit, calling_player)
+                                                               ldr_index, best_suit, calling_player, testing)
 
     team1.tricks = player1.tricks_won + player3.tricks_won
     team2.tricks = player2.tricks_won + player4.tricks_won
@@ -1275,40 +1289,74 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
     if team1.tricks > team2.tricks:
         if calling_player.name == 'Player2' or calling_player.name == 'Player4' or team1.tricks == 5:
             team1.points += 2
-            print(f'\nYou win! Team 1 won, taking {team1.tricks} tricks. Your team scored 2 points!')
+            not testing and print(f'\nYou win! Team 1 won, taking {team1.tricks} tricks. Your team scored 2 points!')
         else:
             team1.points += 1
-            print(f'\nYou win! Team 1 won, taking {team1.tricks} tricks. Your team scored 1 point!')
+            not testing and print(f'\nYou win! Team 1 won, taking {team1.tricks} tricks. Your team scored 1 point!')
     elif team2.tricks > team1.tricks:
         if calling_player.name == 'Player1' or calling_player.name == 'Player3' or team2.tricks == 5:
             team2.points += 2
-            print(f'\nYou lost this round! Team 2 won, taking {team2.tricks} tricks. They scored 2 points!')
+            not testing and print(f'\nYou lost this round! Team 2 won, taking {team2.tricks} tricks. They scored 2 points!')
         else:
             team2.points += 1
-            print(f'\nYou lost this round! Team 2 won, taking {team2.tricks} tricks. They scored 1 point!')
+            not testing and print(f'\nYou lost this round! Team 2 won, taking {team2.tricks} tricks. They scored 1 point!')
 
-    time.sleep(2.5)
-    print(f'\nThe game score is {team1.points}-{team2.points}')
-    time.sleep(2.5)
+    not testing and time.sleep(2.5)
+    not testing and print(f'\nThe game score is {team1.points}-{team2.points}')
+    not testing and time.sleep(2.5)
 
     return team1, team2, player1, player2, player3, player4
 
+def play_game(testing):
+    # Create the 4 players and the deck out of the 24 possible cards.
+    # Randomly assign 5 cards to each player (no repeats)
+    # Flip one remaining card
 
-players = {player_1: 1, player_2: 2, player_3: 3, player_4: 4}
-dealer, dealer_index = random.choice(list(players.items()))
-leader_index = (dealer_index % 4) + 1
+    d = Deck()
+    d.show()
 
-while team_1.points < 11 and team_2.points < 11:
-    team_1, team_2, player_1, player_2, player_3, player_4 = play_round(team_1, team_2, player_1, player_2, player_3,
-                                                                        player_4, d, dealer_index, dealer, leader_index)
-    dealer_index = dealer_index % 4 + 1
-    leader_index = leader_index % 4 + 1
-    dealer = list(players.keys())[list(players.values()).index(dealer_index)]
-    d.destroy()
-    d.build()
-    if team_1.points >= 11:
-        print(f'You win the game! Final Score: {team_1.points}-{team_2.points}')
-        break
-    elif team_2.points >= 11:
-        print(f'You lose the game! Final Score: {team_1.points}-{team_2.points}')
-        break
+    player_1 = Player(1)
+    player_2 = Player(2)
+    player_3 = Player(3)
+    player_4 = Player(4)
+
+    team_1 = Team(player_1, player_3, 0, 0)
+    team_2 = Team(player_2, player_4, 0, 0)
+
+
+    players = {player_1: 1, player_2: 2, player_3: 3, player_4: 4}
+    dealer, dealer_index = random.choice(list(players.items()))
+    leader_index = (dealer_index % 4) + 1
+
+    while team_1.points < 11 and team_2.points < 11:
+        team_1, team_2, player_1, player_2, player_3, player_4 = play_round(team_1, team_2, player_1, player_2, player_3,
+                                                                            player_4, d, dealer_index, dealer, leader_index, testing)
+        dealer_index = dealer_index % 4 + 1
+        leader_index = leader_index % 4 + 1
+        dealer = list(players.keys())[list(players.values()).index(dealer_index)]
+        d.destroy()
+        d.build()
+        if team_1.points >= 11:
+            not testing and print(f'You win the game! Final Score: {team_1.points}-{team_2.points}')
+            return "Team 1"
+        elif team_2.points >= 11:
+            not testing and print(f'You lose the game! Final Score: {team_1.points}-{team_2.points}')
+            return "Team 2"
+
+
+def main():
+    # prompt user for testing or not
+    val = input("Enter \"t\" if you would like to test the AI. ")
+    testing = True if val == "t" else False
+
+    if testing:
+        wins = {"Team 1": 0, "Team 2": 0}
+        for _ in range(0, 1000):
+            winning_team = play_game(testing=True)
+            wins[winning_team] += 1
+        print(wins)
+    else:
+        play_game(testing=False)
+
+if __name__ == "__main__":
+    main()
