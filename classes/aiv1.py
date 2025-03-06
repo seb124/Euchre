@@ -14,7 +14,7 @@ class AIV1(Computer):
         deck = Deck()
         card_list = deck.build()
 
-        # Probability table for opponents (keys: player numbers, values: probability distributions)
+        # Probability table for opponents
         self.PT: dict[int, dict[str, float]] = {
             player: {card.card_string: 1/3 for card in card_list}  # Equal probability distribution initially
             for player in [1, 2, 3, 4] if player != self.number
@@ -28,10 +28,10 @@ class AIV1(Computer):
         action: "pass" or "call"
         trump_suit: The suit in question (e.g., "Spades")
         """
-        # Indices for all 8 trump suit cards in the probability table
         off_suit = {"Spades": "Clubs", "Clubs": "Spades", "Diamonds": "Hearts", "Hearts": "Diamonds"}
 
-        trump_cards_indices = [f"Jack of {flipped_card.suit}", 
+        # Indices for all 8 trump suit cards in the probability table
+        trump_cards = [f"Jack of {flipped_card.suit}", 
                                f"Jack of {off_suit[flipped_card.suit]}", 
                                f"Ace of {flipped_card.suit}", 
                                f"King of {flipped_card.suit}", 
@@ -39,7 +39,7 @@ class AIV1(Computer):
                                f"10 of {flipped_card.suit}", 
                                f"9 of {flipped_card.suit}"]  # Jack of Trump, Jack of Off-Suit, A, K, Q, 10, 9
         
-        top_5_trump_indices = trump_cards_indices[:5]
+        top_5_trump_cards = trump_cards[:5]
 
         #Ensure no opponent has AI's cards
         for p in self.PT.keys():  
@@ -64,25 +64,25 @@ class AIV1(Computer):
         # Adjust Probabilities
         if action == "pass":
             # Player is less likely to have top trump cards
-            for card in top_5_trump_indices:
+            for card in top_5_trump_cards:
                 self.PT[player_num][card] *= 0.2  # Reduce their prob
 
             # Distribute missing probability to other players (only top 5 cards)
-            redistribute_amount = sum(self.PT[player_num][card] for card in top_5_trump_indices) / 2  
+            redistribute_amount = sum(self.PT[player_num][card] for card in top_5_trump_cards) / 2  
             for p in self.PT:
                 if p != player_num:
-                    for card in top_5_trump_indices:
+                    for card in top_5_trump_cards:
                         self.PT[p][card] += redistribute_amount / 2
 
         elif action == "call":
             # Player is more likely to have top trump cards
-            for card in top_5_trump_indices:
+            for card in top_5_trump_cards:
                 self.PT[player_num][card] *= 1.5  # Increase their prob
 
             # Reduce probability of others having these trump cards
             for p in self.PT:
                 if p != player_num:
-                    for idx in top_5_trump_indices:
+                    for idx in top_5_trump_cards:
                         self.PT[p][idx] *= 0.5  # Reduce their prob
 
         # ensure prob sum up to 1
