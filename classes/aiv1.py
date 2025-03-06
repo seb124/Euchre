@@ -109,7 +109,7 @@ class AIV1(Computer):
         picked_value = self.eval_trump_choice(teammate_trump_prob, opponent_trump_prob, flipped_c.suit)
         passed_value = self.eval_alternative(flipped_c.suit)
 
-        if picked_value > passed_value: # I tried > vs >= and > is muchhhh better than >= actually
+        if picked_value > passed_value:
             suit = flipped_c.suit
             was_card_picked  = True
             caller = self
