@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from classes.cards import Card
+from classes.cards import Card, Deck
 
 
 class Player:
@@ -71,6 +71,12 @@ class Player:
 
     def choose_card(self):
         pass   
+
+    def update_probability_table(self, player_num: int, action: str, trump_suit: str):
+        pass
+
+    def reset_probability_table(self, deck: Deck):
+        pass
 
 class Team:
     # Teams are made up of 2 players. In real Euchre, teammates sit across the table from each other. So odd players
