@@ -31,7 +31,13 @@ class AIV1(Computer):
         # Indices for all 8 trump suit cards in the probability table
         off_suit = {"Spades": "Clubs", "Clubs": "Spades", "Diamonds": "Hearts", "Hearts": "Diamonds"}
 
-        trump_cards_indices = [f"Jack of {flipped_card.suit}", f"Jack of {off_suit[flipped_card.suit]}", f"Ace of {flipped_card.suit}", f"King of {flipped_card.suit}", f"Queen of {flipped_card.suit}", f"10 of {flipped_card.suit}", f"9 of {flipped_card.suit}"]  # Jack of Trump, Jack of Off-Suit, A, K, Q, 10, 9
+        trump_cards_indices = [f"Jack of {flipped_card.suit}", 
+                               f"Jack of {off_suit[flipped_card.suit]}", 
+                               f"Ace of {flipped_card.suit}", 
+                               f"King of {flipped_card.suit}", 
+                               f"Queen of {flipped_card.suit}", 
+                               f"10 of {flipped_card.suit}", 
+                               f"9 of {flipped_card.suit}"]  # Jack of Trump, Jack of Off-Suit, A, K, Q, 10, 9
         
         top_5_trump_indices = trump_cards_indices[:5]
 
@@ -86,14 +92,12 @@ class AIV1(Computer):
                 for card in self.PT[p]:
                     self.PT[p][card] = self.PT[p][card] / total  # Normalize probabilities
 
-    def reset_probability_table(self):
-        deck = Deck()
-        card_list = deck.build()
+    def reset_probability_table(self, deck):
+        card_list = deck.cards
         self.PT: dict[int, dict[str, float]] = {
             player: {card.card_string: 1/3 for card in card_list}  # Equal probability distribution initially
             for player in [1, 2, 3, 4] if player != self.number
         }
-
 
     def order_up_card(self, suit: str, flipped_c: Card, dealer: Player, testing: bool):
         teammate_number = ((self.number + 1) % 4) + 1

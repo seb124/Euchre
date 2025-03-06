@@ -222,10 +222,10 @@ def play_game(p1, p2, p3, p4, testing):
         d.destroy()
         d.build()
 
-        p1.reset_probability_table()
-        p2.reset_probability_table()
-        p3.reset_probability_table()
-        p4.reset_probability_table()
+        p1.reset_probability_table(d)
+        p2.reset_probability_table(d)
+        p3.reset_probability_table(d)
+        p4.reset_probability_table(d)
 
         if team_1.points >= 11:
             not testing and print(f'You win the game! Final Score: {team_1.points}-{team_2.points}')

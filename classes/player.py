@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from classes.cards import Card
+from classes.cards import Card, Deck
 
 
 class Player:
@@ -75,7 +75,7 @@ class Player:
     def update_probability_table(self, player_num: int, action: str, trump_suit: str):
         pass
 
-    def reset_probability_table(self):
+    def reset_probability_table(self, deck: Deck):
         pass
 
 class Team:
