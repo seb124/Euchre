@@ -86,7 +86,7 @@ class AIV2(Computer):
                 self.PT[p] = [x / total for x in self.PT[p]]  # Normalize probabilities
 
 
-    def order_up_card(self, suit: str, flipped_c: Card, dealer: Player, testing: bool):
+    def order_up_card(self, suit: str, flipped_c: Card, dlr_index: int, dealer: Player, testing: bool):
         teammate_number = ((self.number + 1) % 4) + 1
         opponent_numbers = [p for p in [1, 2, 3, 4] if p not in [self.number, teammate_number]]
         high_value_cards = self.get_high_value_cards(suit)
@@ -94,9 +94,9 @@ class AIV2(Computer):
         opponent_trump_prob = sum(self.PT[opponent_numbers[0]][card] for card in high_value_cards) + sum(self.PT[opponent_numbers[1]][card] for card in high_value_cards)
 
         picked_value = self.eval_trump_choice(teammate_trump_prob, opponent_trump_prob, suit)
-        passed_value = self.eval_alternative(flipped_c, self.hand)
-        
-        adjustment = self.consider_turn_order(dealer)
+        passed_value = self.eval_alternative(suit)
+
+        adjustment = self.consider_turn_order(dlr_index)
 
         if (picked_value + adjustment) > (passed_value + adjustment): # I tried > vs >= and > is muchhhh better than >= actually
             suit = flipped_c.suit
@@ -156,7 +156,7 @@ class AIV2(Computer):
         else:
             return 0
     
-    def eval_alternative(self, suit, hand):
+    def eval_alternative(self, suit):
         best_alternative_val = 0
         best_suit = None
 
@@ -180,7 +180,7 @@ class AIV2(Computer):
 
         return best_alternative_val
     
-    def consider_turn_order(self, dealer):
-        position_adjustment = {1: -3, 2: 3, 3: -2, 4: 6}
-        player_order = [((dealer + i) % 4) + 1 for i in range(3)] + [dealer]
-        return position_adjustment[player_order[player_order.index(self.number - 1)]]
+    def consider_turn_order(self, dlr_index):
+        position_adjustment = {0: -3, 1: 3, 2: -2, 3: 6}
+        player_order = [(dlr_index) % 4 + 1, (dlr_index + 1) % 4 + 1, (dlr_index + 2) % 4 + 1, dlr_index]
+        return position_adjustment[player_order.index(self.number)]
