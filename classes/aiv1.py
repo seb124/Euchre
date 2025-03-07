@@ -99,7 +99,7 @@ class AIV1(Computer):
             for player in [1, 2, 3, 4] if player != self.number
         }
 
-    def order_up_card(self, suit: str, flipped_c: Card, dealer: Player, testing: bool):
+    def order_up_card(self, suit: str, flipped_c: Card, dlr_index: int, dealer: Player, testing: bool):
         teammate_number = ((self.number + 1) % 4) + 1
         opponent_numbers = [p for p in [1, 2, 3, 4] if p not in [self.number, teammate_number]]
         high_value_cards = self.get_high_value_cards(flipped_c.suit)

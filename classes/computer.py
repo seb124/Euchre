@@ -120,7 +120,7 @@ class Computer(Player):
                 self.card_values[3] += point_dict_spades.get(c.card_string)
         return self.card_values    
     
-    def order_up_card(self, suit: str, flipped_c: Card, dealer: Player, testing: bool):
+    def order_up_card(self, suit: str, flipped_c: Card, dlr_index: int, dealer: Player, testing: bool):
     # This function gives the computer the option to tell the dealer to pick up the card.
     # Aggressiveness of computer ordering up card depends on POINTS_TO_CALL_SUIT integer
         suit_dict = {'Clubs': 0, 'Diamonds': 1, 'Hearts': 2, 'Spades': 3}
