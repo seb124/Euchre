@@ -12,7 +12,7 @@ class User(Player):
     # user does not assign points
         pass
 
-    def order_up_card(self, suit: str, flipped_c: Card, dealer: Player, testing: bool):
+    def order_up_card(self, suit: str, flipped_c: Card, dlr_index: int, dealer: Player, testing: bool):
     # This allows the user to tell a player whether to pick up the flipped card and call that suit clincher
 
         options = ['y', 'n']
