@@ -69,6 +69,7 @@ class Deck:
                 card = Card(suit, rank, point=0, clincher=False, left_bower=False, left_bower_suit=suit, owner=None,
                             display='', card_string=f'{rank} of {suit}')
                 self.cards.append(card)
+        return self.cards
 
     def destroy(self):
         # This empties out the cards in the deck. Used at the end of each round to help simulate reshuffling
