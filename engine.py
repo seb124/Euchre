@@ -1,6 +1,8 @@
 import random
 import time
 from termcolor import colored
+from classes.aiv1 import AIV1
+from classes.aiv2 import AIV2
 from classes.cards import Deck
 from classes.computer import Computer
 from classes.user import User
@@ -133,9 +135,13 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
 
     for player in player_order:
         player_map[player], best_suit, was_suit_picked, player_map[dlr_index], calling_player = \
-            player_map[player].order_up_card(best_suit, flipped_card, player_map[dlr_index], testing)
+            player_map[player].order_up_card(best_suit, flipped_card, dlr_index, player_map[dlr_index], testing)
         if was_suit_picked:
             break
+        else:
+            other_players = [player_num for player_num in player_order if player_num != player]
+            for other_player in other_players:
+                player_map[other_player].update_probability_table(player, "pass", flipped_card)
 
     if not was_suit_picked:
         for player in player_order:
@@ -216,6 +222,12 @@ def play_game(p1, p2, p3, p4, testing):
         dealer = list(players.keys())[list(players.values()).index(dealer_index)]
         d.destroy()
         d.build()
+
+        p1.reset_probability_table(d)
+        p2.reset_probability_table(d)
+        p3.reset_probability_table(d)
+        p4.reset_probability_table(d)
+
         if team_1.points >= 11:
             not testing and print(f'You win the game! Final Score: {team_1.points}-{team_2.points}')
             return "Team 1"
@@ -232,7 +244,7 @@ def main():
     if testing:
         wins = {"Team 1": 0, "Team 2": 0}
         for _ in range(0, 1000):
-            winning_team = play_game(Computer(1), Computer(2), Computer(3), Computer(4), testing=True)
+            winning_team = play_game(AIV2(1), Computer(2), AIV2(3), Computer(4), testing=True)
             wins[winning_team] += 1
         print(wins)
     else:

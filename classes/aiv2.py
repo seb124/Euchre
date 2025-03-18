@@ -7,7 +7,7 @@ from classes.player import Player
 from classes.cards import Deck
 
 
-class AIV1(Computer):
+class AIV2(Computer):
     # At the start of each round, initialize the PT for each player
     def __init__(self, number):
         super().__init__(number)
@@ -109,7 +109,9 @@ class AIV1(Computer):
         picked_value = self.eval_trump_choice(teammate_trump_prob, opponent_trump_prob, flipped_c.suit)
         passed_value = self.eval_alternative(flipped_c.suit)
 
-        if picked_value > passed_value:
+        adjustment = self.consider_turn_order(dlr_index)
+
+        if (picked_value + adjustment) > (passed_value):
             suit = flipped_c.suit
             was_card_picked  = True
             caller = self
@@ -180,3 +182,8 @@ class AIV1(Computer):
                 best_alternative_val = value
 
         return best_alternative_val
+    
+    def consider_turn_order(self, dlr_index):
+        position_adjustment = {0: -3, 1: 3, 2: -2, 3: 6}
+        player_order = [(dlr_index) % 4 + 1, (dlr_index + 1) % 4 + 1, (dlr_index + 2) % 4 + 1, dlr_index]
+        return position_adjustment[player_order.index(self.number)]
