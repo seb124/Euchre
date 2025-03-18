@@ -78,6 +78,9 @@ class Player:
     def reset_probability_table(self, deck: Deck):
         pass
 
+    def generate_smack_talk(self, action: str):
+        pass
+
 class Team:
     # Teams are made up of 2 players. In real Euchre, teammates sit across the table from each other. So odd players
     # make up team1, and even numbered players make up team2
