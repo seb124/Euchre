@@ -1,30 +1,12 @@
 import sys
 import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from termcolor import colored
-import time
-from dotenv import load_dotenv
 from classes.computer import Computer
 from classes.cards import Card
 from classes.player import Player
 from classes.cards import Deck
-from langchain_openai import ChatOpenAI
-from langchain_core.prompts.chat import (
-    HumanMessagePromptTemplate,
-    ChatPromptTemplate
-)
-
-load_dotenv()
-OPENAI_MODEL = "gpt-3.5-turbo"
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-PROMPT_SMACK_TALK = """
- You are playing the card game Euchre and are trying to mislead your 
- opponents with smack talking based on their call to {action} the card and their 
- proabability of having certain cards as seen here: {probability}. 
- Based on who you are talking to, you will state the player number and then 
- your smack talk, like 'Player 1: Are you scared?'
-"""
-
+import openai
+import json
 
 class AIV4(Computer):
     # At the start of each round, initialize the PT for each player
@@ -42,20 +24,19 @@ class AIV4(Computer):
         self.last_smack_talk = 0
 
     def generate_smack_talk(self, action: str):
-        current_time = time.time()
-        if current_time - self.last_smack_talk < 20:
-            return
-        try:
-            llm = ChatOpenAI(openai_api_key=OPENAI_API_KEY, model_name=OPENAI_MODEL)
-            message = HumanMessagePromptTemplate.from_template(template=PROMPT_SMACK_TALK)
-            chat_prompt = ChatPromptTemplate.from_messages(messages=[message])
-            chat_prompt_with_values = chat_prompt.format_prompt(action=action, probability=self.PT)
-            response = llm.invoke(chat_prompt_with_values.to_messages())
-            print(colored(response.content, 'blue'))
-            self.last_smack_talk = current_time
-        except Exception as e:
-            print("Failed:", {e})
-            self.last_smack_talk = current_time
+        openai.api_base = "http://localhost:1234/v1"
+        openai.api_key = ""
+
+        pt_str = json.dumps(self.PT, indent=2)
+
+        completion = openai.ChatCompletion.create(
+        model = "local-model",
+        messages = [
+            {"role": "system", "content": "You are an expert in the card game Euchre. You are playing against another team and the game is intense. Only respond in one (1) sentence. Either make a snarky comment or quip, or reference the probability table when making your response, but do not specify the actual values nor mention the probability table ever. You may also make comments on their actions."},
+            {"role": "user", "content": "Smack talk the other team. Probability Table: " + pt_str + "\nAction: " + action}
+        ]
+        )
+        print(completion["choices"][0]["message"]["content"])
 
     def update_probability_table(self, player_num: int, action: str, flipped_card: Card):
         """
