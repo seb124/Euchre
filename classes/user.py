@@ -1,26 +1,24 @@
 import time
+
+from termcolor import colored
 from classes.cards import Card
 from classes.player import Player
-
+import os
+clear = lambda: os.system('clear')
 
 class User(Player):    
-    def evaluate_cards(self):
-    # user does not evaluate cards with algorithm
-        pass
-
-    def assign_points(self, best, lead):
-    # user does not assign points
-        pass
 
     def order_up_card(self, suit: str, flipped_c: Card, dlr_index: int, dealer: Player, testing: bool):
     # This allows the user to tell a player whether to pick up the flipped card and call that suit clincher
-
+        
+        clear()
         options = ['y', 'n']
         print('Your hand is: \n')
         for c in self.hand:
             print(c.display)
             time.sleep(0.3)
         time.sleep(0.5)
+        print(f'The flipped card is: {flipped_c.display}')
         while True:
             try:
                 does_user_order_card = input(

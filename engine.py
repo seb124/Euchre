@@ -3,6 +3,8 @@ import time
 from termcolor import colored
 from classes.cards import Deck
 from classes.player import Team
+import os
+clear = lambda: os.system('clear')
 
 # This is the card game Euchre. Rules: https://bicyclecards.com/how-to-play/euchre/
 # Cards used are 9 up to Ace. 'Going alone' for a round is not a feature of this script
@@ -34,6 +36,7 @@ def assign_point_trick_winner(winning_play, play1, play2, play3, play4):
 def determine_trick_winner(played, testing):
     # After all 4 cards are played, this function finds the one with the highest point value. that card wins the trick
     # and the winning player (owner of that card) is returned
+    print([f"{card.rank} of {card.suit}, {card.point}" for card in played])
     cards_points = {}
     for c in played:
         cards_points[c] = c.point
@@ -43,13 +46,14 @@ def determine_trick_winner(played, testing):
     winning_card = max(cards_points, key=cards_points.get)
     winner = winning_card.owner
     not testing and print(f'\nPlayer{winner} won with the {winning_card.display}')
+    time.sleep(1)
     return winner
 
 
 def play_trick(p1, p2, p3, p4, round_leader, best_suit, caller, testing):
     # The user can now play a card by choosing the index (1-5) of the card to play. That suit is lead
     # and must be followed by other players
-    not testing and print(colored(f'\nClincher: {best_suit} ({caller.name})', 'green'))
+    not testing and print(colored(f'Trump suit: {best_suit} ({caller.name})', 'green'))
 
     p1.assign_clincher(best_suit)
     p2.assign_clincher(best_suit)
@@ -86,7 +90,10 @@ def play_trick(p1, p2, p3, p4, round_leader, best_suit, caller, testing):
         played_cards.append(played_card)
         player_in_lead = determine_winning_trick_so_far(played_cards)
 
+    not testing and time.sleep(1)
     winning_player = determine_trick_winner(played_cards, testing)
+    not testing and time.sleep(1)
+    not testing and clear()
 
     p1, p2, p3, p4 = assign_point_trick_winner(winning_player, p1, p2, p3, p4)
 
@@ -98,6 +105,9 @@ def play_trick(p1, p2, p3, p4, round_leader, best_suit, caller, testing):
 def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index, dlr, ldr_index, testing):
     #  This function runs each round of Euchre and will be looped over until enough points are scored (11 by 1 team)
     not testing and deck.show()
+
+    not testing and print(colored(f'The cards are being dealt...', 'green'))
+    not testing and time.sleep(0.5)
     deck.deal_cards(player1)
     deck.deal_cards(player2)
     deck.deal_cards(player3)
@@ -137,6 +147,8 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
                 player_map[other_player].update_probability_table(player, "pass", flipped_card)
 
     if not was_suit_picked:
+        not testing and print(colored(f'Since everyone passed, players will now have the chance to call suit.', 'green'))
+        time.sleep(0.5)
         for player in player_order:
             best_suit, was_suit_picked, calling_player = \
                 player_map[player].choose_call_suit(best_suit, flipped_card, testing)
@@ -144,6 +156,8 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
                 break
 
     if not was_suit_picked:
+        not testing and print(colored(f'Since everyone passed again, the dealer must pick the suit.', 'green'))
+        time.sleep(0.5)
         best_suit, was_suit_picked, calling_player = player_map[dlr_index].must_call_suit(best_suit, flipped_card)
 
     for c in player1.hand:
@@ -155,13 +169,18 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
     for c in player4.hand:
         c.owner = 4
 
-    not testing and print(colored(f'{calling_player.name}: {best_suit} is clincher suit.', 'green'))
+    not testing and print(colored(f'{calling_player.name}: {best_suit} is the trump suit.', 'green'))
     not testing and time.sleep(1.3)
 
     player1.assign_left_bower(best_suit)
     player2.assign_left_bower(best_suit)
     player3.assign_left_bower(best_suit)
     player4.assign_left_bower(best_suit)
+
+    clear()
+
+    not testing and print(colored(f'{player_map[ldr_index].name} will play their card first.', 'green'))
+    not testing and time.sleep(1.3)
 
     for _ in range(5):
         player1, player2, player3, player4, ldr_index = play_trick(player1, player2, player3, player4,
@@ -196,6 +215,10 @@ def play_game(p1, p2, p3, p4, testing):
     # Randomly assign 5 cards to each player (no repeats)
     # Flip one remaining card
 
+    clear()
+    not testing and print(colored(f'Welcome to Euchre!', 'green'))
+    not testing and time.sleep(1)
+
     d = Deck()
     d.show()
 
@@ -222,8 +245,8 @@ def play_game(p1, p2, p3, p4, testing):
         p4.reset_probability_table(d)
 
         if team_1.points >= 11:
-            not testing and print(f'You win the game! Final Score: {team_1.points}-{team_2.points}')
+            not testing and print(f'Team 1 wins the game! Final Score: {team_1.points}-{team_2.points}')
             return "Team 1"
         elif team_2.points >= 11:
-            not testing and print(f'You lose the game! Final Score: {team_1.points}-{team_2.points}')
+            not testing and print(f'Team 2 wins the game! Final Score: {team_1.points}-{team_2.points}')
             return "Team 2"

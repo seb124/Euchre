@@ -12,7 +12,7 @@ def main():
     testing = True
 
     with open('config/config.json') as f:
-            config = json.load(f)
+            config = json.load(f) 
 
     player_1 = player_mapper[config["player-1"]]
     player_2 = player_mapper[config["player-2"]]
