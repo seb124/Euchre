@@ -151,7 +151,7 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
         not testing and clear()
         not testing and print(colored(f'Since everyone passed, players will now have the chance to choose the trump suit.', 'green'))
         for player in player_order:
-            not testing and clear()
+            not testing and time.sleep(2)
             best_suit, was_suit_picked, calling_player = \
                 player_map[player].choose_call_suit(best_suit, flipped_card, testing)
             if was_suit_picked:
