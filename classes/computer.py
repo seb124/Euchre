@@ -20,7 +20,7 @@ class Computer(Player):
         else:
             was_card_picked_up = False
             caller = None
-            not testing and print(f'{self.name}: Pass')
+            not testing and print(f'{self.name} passed on calling {flipped_c.suit} as the trump suit.')
             not testing and time.sleep(1)
         return self, suit, was_card_picked_up, dealer, caller
 
@@ -51,7 +51,7 @@ class Computer(Player):
         best_suit_idx = self.card_values.index(max(self.card_values))
         if self.card_values[best_suit_idx] < self.POINTS_TO_CALL_SUIT:
             caller = None
-            not testing and print(f'{self.name}: Pass')
+            not testing and print(f'{self.name} passed on choosing a trump suit.')
             not testing and time.sleep(1)
             pass
         elif suits[best_suit_idx] == flipped_c.suit:  # Comp may not call suit that was turned down earlier
@@ -59,7 +59,7 @@ class Computer(Player):
             second_best_suit_idx = self.card_values.index(max(self.card_values))
             if self.card_values[second_best_suit_idx] < self.POINTS_TO_CALL_SUIT:
                 caller = None
-                not testing and print(f'{self.name}: Pass')
+                not testing and print(f'{self.name} passed on choosing a trump suit.')
                 not testing and time.sleep(1)
                 pass
             else:

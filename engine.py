@@ -36,7 +36,6 @@ def assign_point_trick_winner(winning_play, play1, play2, play3, play4):
 def determine_trick_winner(played, testing):
     # After all 4 cards are played, this function finds the one with the highest point value. that card wins the trick
     # and the winning player (owner of that card) is returned
-    print([f"{card.rank} of {card.suit}, {card.point}" for card in played])
     cards_points = {}
     for c in played:
         cards_points[c] = c.point
@@ -137,6 +136,7 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
     was_suit_picked = False
 
     for player in player_order:
+        time.sleep(2)
         player_map[player], best_suit, was_suit_picked, player_map[dlr_index], calling_player = \
             player_map[player].order_up_card(best_suit, flipped_card, dlr_index, player_map[dlr_index], testing)
         if was_suit_picked:
@@ -147,15 +147,19 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
                 player_map[other_player].update_probability_table(player, "pass", flipped_card)
 
     if not was_suit_picked:
-        not testing and print(colored(f'Since everyone passed, players will now have the chance to call suit.', 'green'))
-        time.sleep(0.5)
+        time.sleep(2)
+        not testing and clear()
+        not testing and print(colored(f'Since everyone passed, players will now have the chance to choose the trump suit.', 'green'))
         for player in player_order:
+            time.sleep(2)
             best_suit, was_suit_picked, calling_player = \
                 player_map[player].choose_call_suit(best_suit, flipped_card, testing)
             if was_suit_picked:
                 break
 
     if not was_suit_picked:
+        time.sleep(2)
+        not testing and clear()
         not testing and print(colored(f'Since everyone passed again, the dealer must pick the suit.', 'green'))
         time.sleep(0.5)
         best_suit, was_suit_picked, calling_player = player_map[dlr_index].must_call_suit(best_suit, flipped_card)
@@ -170,7 +174,7 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
         c.owner = 4
 
     not testing and print(colored(f'{calling_player.name}: {best_suit} is the trump suit.', 'green'))
-    not testing and time.sleep(1.3)
+    not testing and input("Press enter to continue.")
 
     player1.assign_left_bower(best_suit)
     player2.assign_left_bower(best_suit)
@@ -179,7 +183,7 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
 
     clear()
 
-    not testing and print(colored(f'{player_map[ldr_index].name} will play their card first.', 'green'))
+    not testing and print(colored(f'{player_map[ldr_index].name} will lead.', 'green'))
     not testing and time.sleep(1.3)
 
     for _ in range(5):
@@ -207,6 +211,7 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
     not testing and time.sleep(2.5)
     not testing and print(f'\nThe game score is {team1.points}-{team2.points}')
     not testing and time.sleep(2.5)
+    clear()
 
     return team1, team2, player1, player2, player3, player4
 
@@ -217,7 +222,7 @@ def play_game(p1, p2, p3, p4, testing):
 
     clear()
     not testing and print(colored(f'Welcome to Euchre!', 'green'))
-    not testing and time.sleep(1)
+    not testing and input("Press enter to begin a game.")
 
     d = Deck()
     d.show()

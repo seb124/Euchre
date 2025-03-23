@@ -11,9 +11,10 @@ class User(Player):
     def order_up_card(self, suit: str, flipped_c: Card, dlr_index: int, dealer: Player, testing: bool):
     # This allows the user to tell a player whether to pick up the flipped card and call that suit clincher
         
+        time.sleep(1)
         clear()
         options = ['y', 'n']
-        print('Your hand is: \n')
+        print('It\'s your turn. Your hand is: \n')
         for c in self.hand:
             print(c.display)
             time.sleep(0.3)
@@ -50,7 +51,7 @@ class User(Player):
             print(c.display)
         while True:
             try:
-                does_user_call = input('\nYour hand is above. Would you like to call clincher suit? (y/n):')
+                does_user_call = input('\nIt\'s your turn. Your hand is above. Would you like to choose the trump suit? (y/n):')
                 if does_user_call[0].lower() not in user_call_options:
                     raise ValueError
                 elif does_user_call[0].lower() == 'y':
