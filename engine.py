@@ -4,6 +4,8 @@ from termcolor import colored
 from classes.cards import Deck
 from classes.player import Team
 import os
+
+from classes.user import User
 clear = lambda: os.system('clear')
 
 # This is the card game Euchre. Rules: https://bicyclecards.com/how-to-play/euchre/
@@ -112,6 +114,16 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
     deck.deal_cards(player3)
     deck.deal_cards(player4)
 
+    for player in [player1, player2, player3, player4]:
+        if isinstance(player, User):
+            print(f'\n{player.name}, your hand is: \n')
+            for c in player.hand:
+                print(c.display)
+                time.sleep(0.3)
+            time.sleep(0.5)
+            input("Press enter to continue.")
+            clear()
+
     player1.tricks_won = 0
     player2.tricks_won = 0
     player3.tricks_won = 0
@@ -133,6 +145,7 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
 
     player_order = [(dlr_index) % 4 + 1, (dlr_index + 1) % 4 + 1, (dlr_index + 2) % 4 + 1, dlr_index]
 
+    not testing and print(f'\n{player_map[player_order[0]].name} will go first.\n')
     was_suit_picked = False
 
     for player in player_order:
@@ -150,6 +163,7 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
         not testing and time.sleep(2)
         not testing and clear()
         not testing and print(colored(f'Since everyone passed, players will now have the chance to choose the trump suit.', 'green'))
+        not testing and print(f'\n{player_map[player_order[0]].name} will go first.\n')
         for player in player_order:
             not testing and time.sleep(2)
             best_suit, was_suit_picked, calling_player = \
