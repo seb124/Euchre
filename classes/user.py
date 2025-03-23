@@ -12,7 +12,7 @@ class User(Player):
     # This allows the user to tell a player whether to pick up the flipped card and call that suit clincher
         
         time.sleep(1)
-        clear()
+        not testing and clear()
         options = ['y', 'n']
         print('It\'s your turn. Your hand is: \n')
         for c in self.hand:

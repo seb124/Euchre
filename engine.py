@@ -41,11 +41,11 @@ def determine_trick_winner(played, testing):
         cards_points[c] = c.point
         if not testing:
             print(f'{c.display} (P{c.owner})')
-            time.sleep(.4)
+            not testing and time.sleep(.4)
     winning_card = max(cards_points, key=cards_points.get)
     winner = winning_card.owner
     not testing and print(f'\nPlayer{winner} won with the {winning_card.display}')
-    time.sleep(1)
+    not testing and time.sleep(1)
     return winner
 
 
@@ -136,7 +136,7 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
     was_suit_picked = False
 
     for player in player_order:
-        time.sleep(2)
+        not testing and clear()
         player_map[player], best_suit, was_suit_picked, player_map[dlr_index], calling_player = \
             player_map[player].order_up_card(best_suit, flipped_card, dlr_index, player_map[dlr_index], testing)
         if was_suit_picked:
@@ -147,21 +147,21 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
                 player_map[other_player].update_probability_table(player, "pass", flipped_card)
 
     if not was_suit_picked:
-        time.sleep(2)
+        not testing and clear()
         not testing and clear()
         not testing and print(colored(f'Since everyone passed, players will now have the chance to choose the trump suit.', 'green'))
         for player in player_order:
-            time.sleep(2)
+            not testing and clear()
             best_suit, was_suit_picked, calling_player = \
                 player_map[player].choose_call_suit(best_suit, flipped_card, testing)
             if was_suit_picked:
                 break
 
     if not was_suit_picked:
-        time.sleep(2)
+        not testing and clear()
         not testing and clear()
         not testing and print(colored(f'Since everyone passed again, the dealer must pick the suit.', 'green'))
-        time.sleep(0.5)
+        not testing and clear()
         best_suit, was_suit_picked, calling_player = player_map[dlr_index].must_call_suit(best_suit, flipped_card)
 
     for c in player1.hand:
@@ -181,7 +181,7 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
     player3.assign_left_bower(best_suit)
     player4.assign_left_bower(best_suit)
 
-    clear()
+    not testing and clear()
 
     not testing and print(colored(f'{player_map[ldr_index].name} will lead.', 'green'))
     not testing and time.sleep(1.3)
@@ -211,7 +211,8 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
     not testing and time.sleep(2.5)
     not testing and print(f'\nThe game score is {team1.points}-{team2.points}')
     not testing and time.sleep(2.5)
-    clear()
+    not testing and clear()
+
 
     return team1, team2, player1, player2, player3, player4
 
@@ -220,7 +221,7 @@ def play_game(p1, p2, p3, p4, testing):
     # Randomly assign 5 cards to each player (no repeats)
     # Flip one remaining card
 
-    clear()
+    not testing and clear()
     not testing and print(colored(f'Welcome to Euchre!', 'green'))
     not testing and input("Press enter to begin a game.")
 
