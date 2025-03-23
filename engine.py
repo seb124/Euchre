@@ -136,7 +136,7 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
     was_suit_picked = False
 
     for player in player_order:
-        not testing and clear()
+        not testing and time.sleep(2)
         player_map[player], best_suit, was_suit_picked, player_map[dlr_index], calling_player = \
             player_map[player].order_up_card(best_suit, flipped_card, dlr_index, player_map[dlr_index], testing)
         if was_suit_picked:
@@ -147,7 +147,7 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
                 player_map[other_player].update_probability_table(player, "pass", flipped_card)
 
     if not was_suit_picked:
-        not testing and clear()
+        not testing and time.sleep(2)
         not testing and clear()
         not testing and print(colored(f'Since everyone passed, players will now have the chance to choose the trump suit.', 'green'))
         for player in player_order:
@@ -158,10 +158,10 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
                 break
 
     if not was_suit_picked:
-        not testing and clear()
+        not testing and time.sleep(2)
         not testing and clear()
         not testing and print(colored(f'Since everyone passed again, the dealer must pick the suit.', 'green'))
-        not testing and clear()
+        not testing and time.sleep(2)
         best_suit, was_suit_picked, calling_player = player_map[dlr_index].must_call_suit(best_suit, flipped_card)
 
     for c in player1.hand:
