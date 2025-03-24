@@ -3,6 +3,7 @@ import time
 from termcolor import colored
 from classes.aiv1 import AIV1
 from classes.aiv2 import AIV2
+from classes.aiv4 import AIV4
 from classes.cards import Deck
 from classes.computer import Computer
 from classes.user import User
@@ -142,6 +143,9 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
             other_players = [player_num for player_num in player_order if player_num != player]
             for other_player in other_players:
                 player_map[other_player].update_probability_table(player, "pass", flipped_card)
+                random_integer = random.randint(1, 100)
+                if ((player % 2) != (other_player % 2) and (random_integer <=20)):
+                    not testing and player_map[other_player].generate_smack_talk("pass")
 
     if not was_suit_picked:
         for player in player_order:
@@ -243,12 +247,12 @@ def main():
 
     if testing:
         wins = {"Team 1": 0, "Team 2": 0}
-        for _ in range(0, 1000):
-            winning_team = play_game(AIV2(1), Computer(2), AIV2(3), Computer(4), testing=True)
+        for _ in range(0, 1):
+            winning_team = play_game(AIV4(1), Computer(2), AIV2(3), Computer(4), testing=True)
             wins[winning_team] += 1
         print(wins)
     else:
-        play_game(User(1), Computer(2), Computer(3), Computer(4), testing=False)
+        play_game(User(1), AIV4(2), Computer(3), AIV4(4), testing=False)
 
 if __name__ == "__main__":
     main()

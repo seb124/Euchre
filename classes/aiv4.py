@@ -7,6 +7,7 @@ from classes.player import Player
 from classes.cards import Deck
 import openai
 import json
+from termcolor import colored
 
 class AIV4(Computer):
     # At the start of each round, initialize the PT for each player
@@ -32,11 +33,13 @@ class AIV4(Computer):
         completion = openai.ChatCompletion.create(
         model = "local-model",
         messages = [
-            {"role": "system", "content": "You are an expert in the card game Euchre. You are playing against another team and the game is intense. Only respond in one (1) sentence. Either make a snarky comment or quip, or reference the probability table when making your response, but do not specify the actual values nor mention the probability table ever. You may also make comments on their actions."},
-            {"role": "user", "content": "Smack talk the other team. Probability Table: " + pt_str + "\nAction: " + action}
+            {"role": "system", "content": 
+                "You are an expert in the card game Euchre. You are playing against another team and the game is intense. Only respond in one (1) sentence. I will provide a probability table of players' cards and the most recent player action. Base the severity of your trash talk on players' probabilities, but never specifically say the values. Never say a specific percentage."},
+            {"role": "user", "content": "Trash talk other players. Probability Table: " + pt_str + "\nAction: " + action}
         ]
         )
-        print(completion["choices"][0]["message"]["content"])
+        print(colored(f'{self.name}: {completion["choices"][0]["message"]["content"]}', 'blue'))
+
 
     def update_probability_table(self, player_num: int, action: str, flipped_card: Card):
         """
