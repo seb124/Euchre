@@ -22,8 +22,6 @@ class AIV4(Computer):
             for player in [1, 2, 3, 4] if player != self.number
         }
 
-        self.last_smack_talk = 0
-
     def generate_smack_talk(self, action: str):
         openai.api_base = "http://localhost:1234/v1"
         openai.api_key = ""
