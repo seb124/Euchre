@@ -3,10 +3,11 @@ from classes.computer import Computer
 from classes.aiv1 import AIV1
 from classes.aiv2 import AIV2
 from classes.aiv3 import AIV3
+from classes.aiv4 import AIV4
 from classes.user import User
 import json
 
-player_mapper = {"User": User, "Computer": Computer, "AIV1": AIV1, "AIV2": AIV2, "AIV3": AIV3}
+player_mapper = {"User": User, "Computer": Computer, "AIV1": AIV1, "AIV2": AIV2, "AIV3": AIV3, "AIV4": AIV4}
 
 def main():
     # prompt user for testing or not
