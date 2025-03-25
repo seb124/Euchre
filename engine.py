@@ -135,6 +135,9 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
             other_players = [player_num for player_num in player_order if player_num != player]
             for other_player in other_players:
                 player_map[other_player].update_probability_table(player, "pass", flipped_card)
+                random_integer = random.randint(1, 100)
+                if ((player % 2) != (other_player % 2) and (random_integer <=20)):
+                    not testing and player_map[other_player].generate_smack_talk("pass")
 
     if not was_suit_picked:
         for player in player_order:
