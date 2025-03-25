@@ -60,6 +60,14 @@ class AIV4(Computer):
         
         top_5_trump_cards = trump_cards[:5]
 
+        trump_reduction_factors = { #sets up what to reduce by
+            f"Jack of {flipped_card.suit}": 0.7,  # Right Bower
+            f"Jack of {off_suit[flipped_card.suit]}": 0.7,  # Left Bower
+            f"Ace of {flipped_card.suit}": 0.6,
+            f"King of {flipped_card.suit}": 0.5,
+            f"Queen of {flipped_card.suit}": .4
+        }
+
         #Ensure no opponent has AI's cards
         for p in self.PT.keys():  
             removed_prob = 0  # Track total probability removed
@@ -83,34 +91,46 @@ class AIV4(Computer):
         # Adjust Probabilities
         if action == "pass":
             # Player is less likely to have top trump cards
-            for card in top_5_trump_cards:
-                self.PT[player_num][card] *= 0.2  # Reduce their prob
+            removed_prob = 0 #track probability decreases from this player
+            
+            for card, reduction in trump_reduction_factors.items():
+                if card in self.PT[player_num]:  # Ensure the card exists in the table
+                    removed_prob += self.PT[player_num][card] * reduction
+                    self.PT[player_num][card] *= (1 - reduction) 
 
-            # Distribute missing probability to other players (only top 5 cards)
-            redistribute_amount = sum(self.PT[player_num][card] for card in top_5_trump_cards) / 2  
-            for p in self.PT:
-                if p != player_num:
-                    for card in top_5_trump_cards:
-                        self.PT[p][card] += redistribute_amount / 2
+             # Redistribute the removed probability to other players
+            num_opponents = len(self.PT) - 1
+            if num_opponents > 0:
+                for p in self.PT:
+                    if p != player_num:
+                        for card in trump_reduction_factors.keys():
+                            self.PT[p][card] += removed_prob / num_opponents  
 
         elif action == "call":
-            # Player is more likely to have top trump cards
-            for card in top_5_trump_cards:
-                self.PT[player_num][card] *= 1.5  # Increase their prob
+            increase_factor = 1.5  # Increase probability of having top trump
+            for card in trump_reduction_factors.keys():
+                if card in self.PT[player_num]:  
+                    self.PT[player_num][card] *= increase_factor  
 
             # Reduce probability of others having these trump cards
             for p in self.PT:
                 if p != player_num:
-                    for idx in top_5_trump_cards:
-                        self.PT[p][idx] *= 0.5  # Reduce their prob
+                    for card in trump_reduction_factors.keys():
+                        self.PT[p][card] *= 0.5 
 
-        # ensure prob sum up to 1
+            # ensure prob sum up to 1
+            for p in self.PT:
+                total = sum(self.PT[p][card] for card in self.PT[p])
+                if total > 0:
+                    for card in self.PT[p]:
+                        self.PT[p][card] = self.PT[p][card] / total  # Normalize probabilities
+        #double check that it all adds up 
         for p in self.PT:
             total = sum(self.PT[p][card] for card in self.PT[p])
             if total > 0:
                 for card in self.PT[p]:
-                    self.PT[p][card] = self.PT[p][card] / total  # Normalize probabilities
-
+                    self.PT[p][card] /= total  
+                    
     def reset_probability_table(self, deck):
         card_list = deck.cards
         self.PT: dict[int, dict[str, float]] = {
@@ -175,10 +195,10 @@ class AIV4(Computer):
             return 0
     
     def calculate_bonus_penalty(self, probability):
-        if probability > 0.8:
-            return 10
+        if probability > 0.75:  # Adjusting threshold slightly
+            return 12  # Increase penalty for high opponent trump probability
         elif probability > 0.5:
-            return 5
+            return 6  # Increase this slightly
         else:
             return 0
     
