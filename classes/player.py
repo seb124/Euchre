@@ -45,7 +45,7 @@ class Player:
     def order_up_card(self, suit: str, flipped_c: Card, dlr_index: int, dealer):
         pass
 
-    def choose_call_suit(self, suit: str, flipped_c: Card):
+    def choose_call_suit(self, suit: str, flipped_c: Card, testing: bool, dlr_index: int):
         pass   
 
     def must_call_suit(self, suit: str, flipped_c: Card):

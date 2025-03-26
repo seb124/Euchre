@@ -20,7 +20,7 @@ class AIV2(Computer):
             for player in [1, 2, 3, 4] if player != self.number
         }
 
-    def update_probability_table(self, player_num: int, action: str, flipped_card: Card):
+    def update_probability_table(self, player_num: int, action: str, suit: str):
         """
         Update probability table when a player passes or calls trump.
         
@@ -31,13 +31,13 @@ class AIV2(Computer):
         off_suit = {"Spades": "Clubs", "Clubs": "Spades", "Diamonds": "Hearts", "Hearts": "Diamonds"}
 
         # Indices for all 8 trump suit cards in the probability table
-        trump_cards = [f"Jack of {flipped_card.suit}", 
-                               f"Jack of {off_suit[flipped_card.suit]}", 
-                               f"Ace of {flipped_card.suit}", 
-                               f"King of {flipped_card.suit}", 
-                               f"Queen of {flipped_card.suit}", 
-                               f"10 of {flipped_card.suit}", 
-                               f"9 of {flipped_card.suit}"]  # Jack of Trump, Jack of Off-Suit, A, K, Q, 10, 9
+        trump_cards = [f"Jack of {suit}", 
+                               f"Jack of {off_suit[suit]}", 
+                               f"Ace of {suit}", 
+                               f"King of {suit}", 
+                               f"Queen of {suit}", 
+                               f"10 of {suit}", 
+                               f"9 of {suit}"]  # Jack of Trump, Jack of Off-Suit, A, K, Q, 10, 9
         
         top_5_trump_cards = trump_cards[:5]
 
@@ -172,7 +172,7 @@ class AIV2(Computer):
 
             teammate_number = ((self.number + 1) % 4) + 1
             opponent_numbers = [p for p in [1, 2, 3, 4] if p not in [self.number, teammate_number]]
-            high_value_cards = self.get_high_value_cards(suit)
+            high_value_cards = self.get_high_value_cards(suit_type)
             teammate_trump_prob = sum(self.PT[teammate_number][card] for card in high_value_cards)
             opponent_trump_prob = sum(self.PT[opponent_numbers[0]][card] for card in high_value_cards) + sum(self.PT[opponent_numbers[1]][card] for card in high_value_cards)
             
