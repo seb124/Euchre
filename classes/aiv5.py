@@ -77,8 +77,36 @@ class AIV5(AIV3):
                      f'10 of {best_suit}': max(self.PT[opponent_numbers[0]][f'10 of {best_suit}'], self.PT[opponent_numbers[1]][f'10 of {best_suit}']),
                      f'9 of {best_suit}': max(self.PT[opponent_numbers[0]][f'9 of {best_suit}'], self.PT[opponent_numbers[1]][f'9 of {best_suit}'])}
 
-        # add up point values (divided by 2 since a single opponent won't have all 5 of the most likely cards) 
+        # add up point values (divided by 2 since opponents, on average, won't have all 5 of their most likely cards) 
         for card in sorted(card_list, key=card_list.get, reverse=True)[0:5]:
             total += point_dict[card] / 2
 
-        return total        
+        return total
+    
+    def must_call_suit(self, suit, flipped_c):
+        was_card_picked = False
+        suits = ['Clubs', 'Diamonds', 'Hearts', 'Spades']
+        best_suit = ['', 0]
+
+        # calculate the best suit that wasn't the flipped card suit
+        for suit_type in suits:
+            if suit_type == flipped_c.suit:
+                continue
+
+            teammate_number = ((self.number + 1) % 4) + 1
+            opponent_numbers = [p for p in [1, 2, 3, 4] if p not in [self.number, teammate_number]]
+            high_value_cards = self.get_high_value_cards(suit_type)
+            teammate_trump_prob = sum(self.PT[teammate_number][card] for card in high_value_cards)
+            opponent_trump_prob = sum(self.PT[opponent_numbers[0]][card] for card in high_value_cards) + sum(self.PT[opponent_numbers[1]][card] for card in high_value_cards)
+
+            picked_value = self.eval_trump_choice(teammate_trump_prob, opponent_trump_prob, suit_type)
+
+            if (picked_value) > best_suit[1]:
+                best_suit = [suit_type, picked_value]
+
+        # call our best suit, since we must call the suit at this stage
+        suit = best_suit[0]
+        was_card_picked  = True
+        caller = self
+
+        return suit, was_card_picked, caller
