@@ -119,7 +119,7 @@ class AIV2(Computer):
         else:
             was_card_picked = False
             caller = None
-            not testing and print(f'{self.name}: Pass')
+            not testing and print(f'{self.name} passed on calling {flipped_c.suit} as the trump suit.')
         return self, suit, was_card_picked, dealer, caller
     
     def get_high_value_cards(self, suit):
