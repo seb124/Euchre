@@ -1,26 +1,25 @@
 import time
+
+from termcolor import colored
 from classes.cards import Card
 from classes.player import Player
-
+import os
+clear = lambda: os.system('clear')
 
 class User(Player):    
-    def evaluate_cards(self):
-    # user does not evaluate cards with algorithm
-        pass
-
-    def assign_points(self, best, lead):
-    # user does not assign points
-        pass
 
     def order_up_card(self, suit: str, flipped_c: Card, dlr_index: int, dealer: Player, testing: bool):
     # This allows the user to tell a player whether to pick up the flipped card and call that suit clincher
-
+        
+        time.sleep(1)
+        not testing and clear()
         options = ['y', 'n']
-        print('Your hand is: \n')
+        print(f'{self.name}, it\'s your turn. Your hand is: \n')
         for c in self.hand:
             print(c.display)
             time.sleep(0.3)
         time.sleep(0.5)
+        print(f'The flipped card is: {flipped_c.display}')
         while True:
             try:
                 does_user_order_card = input(
@@ -52,7 +51,7 @@ class User(Player):
             print(c.display)
         while True:
             try:
-                does_user_call = input('\nYour hand is above. Would you like to call clincher suit? (y/n):')
+                does_user_call = input(f'\n{self.name}, it\'s your turn. Your hand is above. Would you like to choose the trump suit? (y/n):')
                 if does_user_call[0].lower() not in user_call_options:
                     raise ValueError
                 elif does_user_call[0].lower() == 'y':
@@ -102,7 +101,7 @@ class User(Player):
         while True:
             try:
                 called_suit = input(
-                    f'''\nYour hand is above and you can call any suit except {flipped_c.get_suit()}.\nYou must call suit. 
+                    f'''\n{self.name}, your hand is above and you can call any suit except {flipped_c.get_suit()}.\nYou must call suit. 
                     Please enter the first letter of the suit to call (c/d/h/s): ''')
                 if called_suit[0].lower() == flipped_c.get_suit()[0].lower():
                     print('You entered the suit that was turned down...Please enter a different suit')
@@ -135,7 +134,7 @@ class User(Player):
 
         while True:
             try:
-                print('\nYour hand is:\n')
+                print(f'\n{self.name}, your hand is:\n')
                 for c in self.hand:
                     print(c.display)
                 if caller is self:
@@ -158,7 +157,7 @@ class User(Player):
         # This allows the user to play any card as the first card of the trick
 
         num_cards_in_hand = len(self.hand)
-        print('\nYour hand is: ')
+        print(f'\n{self.name}, your hand is: ')
         for c in self.hand:
             print(c.display)
         while True:
@@ -183,7 +182,7 @@ class User(Player):
             time.sleep(.4)
             print(f'{pc.display} (P{pc.owner})')
         time.sleep(1)
-        print('\nYour hand is: \n')
+        print(f'\n{self.name}, your hand is: ')
         for c in self.hand:
             print(c.display)
 
