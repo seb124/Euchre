@@ -157,7 +157,7 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
         else:
             other_players = [player_num for player_num in player_order if player_num != player]
             for other_player in other_players:
-                player_map[other_player].update_probability_table(player, "pass", flipped_card)
+                player_map[other_player].update_probability_table(player, "pass", flipped_card.suit)
                 random_integer = random.randint(1, 100)
                 if ((player % 2) != (other_player % 2) and (random_integer <=20)):
                     not testing and player_map[other_player].generate_smack_talk("pass")
@@ -171,9 +171,16 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
         for player in player_order:
             not testing and time.sleep(2)
             best_suit, was_suit_picked, calling_player = \
-                player_map[player].choose_call_suit(best_suit, flipped_card, testing)
+                player_map[player].choose_call_suit(best_suit, flipped_card, testing, dlr_index)
             if was_suit_picked:
                 break
+            else:
+                other_players = [player_num for player_num in player_order if player_num != player]
+                for other_player in other_players:
+                    for suit in ['Clubs', 'Diamonds', 'Hearts', 'Spades']:
+                        if suit != flipped_card.suit:
+                            player_map[other_player].update_probability_table(player, "pass", suit)
+
 
     if not was_suit_picked:
         not testing and time.sleep(2)
