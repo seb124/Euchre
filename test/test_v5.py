@@ -8,10 +8,8 @@ from classes.aiv3 import AIV3
 from classes.aiv5 import AIV5
 from classes.cards import Deck
 from classes.player import Team
-from classes.computer import Computer
 import engine
 import scipy
-import matplotlib.pyplot as plt
 
 # This test examines how well AIV5 actually performs, since its updated functions are not always called
 
@@ -179,7 +177,5 @@ def test_v5():
     # So, we fail to reject that the slope is 0 and conclude that there is a slight positive correlation between the number of rounds
     # that call AIV5's new function and the number of rounds that a team of AIV5s wins. So, AIV5 does improve performance.
     
-
-
 
 test_v5()
