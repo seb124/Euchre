@@ -185,7 +185,7 @@ class Player:
     def reset_probability_table(self, deck: Deck):
         pass
 
-    def generate_smack_talk(self, action: str):
+    def generate_smack_talk(self, action: str, flipped_c: Card):
         pass
 
 class Team:
