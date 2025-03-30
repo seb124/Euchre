@@ -20,7 +20,7 @@ class AIV1(Computer):
             for player in [1, 2, 3, 4] if player != self.number
         }
 
-    def update_probability_table(self, player_num: int, action: str, suit: str):
+    def update_probability_table(self, player_num: int, action: str, flipped_c: Card, suit: str):
         """
         Update probability table when a player passes or calls trump.
         
@@ -49,6 +49,10 @@ class AIV1(Computer):
             for card in self.hand:  # Check each card in AI's hand
                 removed_prob += self.PT[p][card.card_string]
                 self.PT[p][card.card_string] = 0  # No one else can have AI's cards
+
+            # No one can have the card on the table in their hand
+            removed_prob += self.PT[p][flipped_c.card_string]
+            self.PT[p][flipped_c.card_string] = 0
 
             #Redistribute probability to remaining unknown cards
             for card in self.PT[p].keys():
