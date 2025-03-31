@@ -1,6 +1,5 @@
 import sys
 import os
-
 import scipy.stats
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import random
@@ -9,17 +8,14 @@ from classes.aiv5 import AIV5
 from classes.cards import Deck
 from classes.player import Team
 import engine
-import scipy
 
-# This test examines how well AIV5 actually performs, since its updated functions are not always called
-
-# TODO: run again, record all results in a file. (Maybe do 100,000 at a time?) For testing all others: also record results
-
-# every 100 games, a new "point" will be added to the list
+# This test examines how well AIV5 actually performs, since its updated functions are not always called.
+# Every 100 games, a new "point" will be added to the list
 
 x = [] # % of rounds in 100 games that go to a second "pass" (and thus the updated AIV5 functions are called)
-y = [] # % of games (out of 100) that AIV5 wins
+y = [] # % of rounds that go to a second "pass" that AIV5 wins
 
+# create global variables (*for testing purposes only*)
 second_pass_count = 0
 round_wins = 0
 round_count = 0
@@ -154,7 +150,7 @@ def play_game(p1, p2, p3, p4, testing):
             return "Team 2"
 
 def data_collection():
-    # run this if you want to collect more data in the v5_datapoints.txt file
+    # run this by uncommenting function below if you want to collect more data in the v5_datapoints.txt file
 
     for i in range(1000000):
         play_game(AIV5(1), AIV3(2), AIV5(3), AIV3(4), True)
@@ -163,6 +159,7 @@ def data_collection():
             global second_pass_count
             global round_count
             global round_wins
+
             x.append(second_pass_count / round_count)
             y.append(round_wins / round_count)
 
@@ -173,7 +170,6 @@ def data_collection():
             second_pass_count = 0
             round_count = 0
 
-    
 
 # data_collection()
 
@@ -196,7 +192,7 @@ def statistical_analysis():
     print(result.pvalue) # prints 7.938671586906828e-05 (< 0.05)
 
     # So, we fail to reject that the slope is 0 and conclude that there is a slight positive correlation between the number of rounds
-    # that call AIV5's new function and the number of rounds that a team of AIV5s wins. So, AIV5 does slightly improve performance.
+    # that call AIV5's new function and the number of those rounds that a team of AIV5s wins. So, AIV5 does slightly improve performance.
 
 
 statistical_analysis()
