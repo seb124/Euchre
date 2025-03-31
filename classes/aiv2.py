@@ -7,7 +7,11 @@ from classes.player import Player
 
 
 class AIV2(AIV1):
-
+    """
+    AIV2 inherits from AIV1. AIV2 takes into account the player position for the round.
+    A player that goes first is given a negative adjustment, while a player that goes 
+    later in the round is given a positive adjustment.
+    """
     def order_up_card(self, suit: str, flipped_c: Card, dlr_index: int, dealer: Player, testing: bool):
         teammate_number = ((self.number + 1) % 4) + 1
         opponent_numbers = [p for p in [1, 2, 3, 4] if p not in [self.number, teammate_number]]

@@ -6,7 +6,10 @@ from classes.cards import Card
 
 
 class AIV3(AIV2):
-
+    """
+    AIV3 inherits from AIV2. AIV3 makes adjustments to update_probability_table. 
+    The probability table is updated with a risky approach based on inherent the value of the cards.
+    """
     def update_probability_table(self, player_num: int, action: str, flipped_c: Card, suit: str):
         """
         Update probability table when a player passes or calls trump.

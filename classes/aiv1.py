@@ -8,6 +8,10 @@ from classes.cards import Deck
 
 
 class AIV1(Computer):
+    """
+    AIV1 inherits from Computer, the original Euchre AI agent. AIV1 initializes a probability table, updates 
+    the probability table with a conservative approach, and pick or passes on the flipped card based on a heuristic. 
+    """
     # At the start of each round, initialize the PT for each player
     def __init__(self, number):
         super().__init__(number)
