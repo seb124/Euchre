@@ -13,7 +13,7 @@ import engine
 # Every 100 games, a new "point" will be added to the list
 
 x = [] # % of rounds in 100 games that go to a second "pass" (and thus the updated AIV5 functions are called)
-y = [] # % of rounds that go to a second "pass" that AIV5 wins
+y = [] # % of those rounds that a team of AIV5s wins (against a team of AIV3s)
 
 # create global variables (*for testing purposes only*)
 second_pass_count = 0
