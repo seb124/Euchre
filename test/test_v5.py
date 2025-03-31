@@ -13,6 +13,7 @@ import scipy
 
 # This test examines how well AIV5 actually performs, since its updated functions are not always called
 
+# TODO: run again, record all results in a file. (Maybe do 100,000 at a time?) For testing all others: also record results
 
 # every 100 games, a new "point" will be added to the list
 
@@ -152,7 +153,9 @@ def play_game(p1, p2, p3, p4, testing):
         elif team_2.points >= 11:
             return "Team 2"
 
-def test_v5():
+def data_collection():
+    # run this if you want to collect more data in the v5_datapoints.txt file
+
     for i in range(1000000):
         play_game(AIV5(1), AIV3(2), AIV5(3), AIV3(4), True)
 
@@ -162,20 +165,38 @@ def test_v5():
             global round_wins
             x.append(second_pass_count / round_count)
             y.append(round_wins / round_count)
+
+            file = open("test/data/v5_datapoints.txt", "a")
+            file.write(f"{(second_pass_count / round_count)} {round_wins / round_count}\n")
+
             round_wins = 0
             second_pass_count = 0
             round_count = 0
 
-    # statistical analysis - hypothesize that the slope of the line (proportional to correlation coefficient) is nonzero, hope that it's positive
-
-    result = scipy.stats.linregress(x, y)
-
-    # With one iteration of 1 million games of Euchre, the results are:
-    print(result.rvalue) # prints 0.0296260491908133
-    print(result.pvalue) # prints 0.003049172789506817 (< 0.05)
-
-    # So, we fail to reject that the slope is 0 and conclude that there is a slight positive correlation between the number of rounds
-    # that call AIV5's new function and the number of rounds that a team of AIV5s wins. So, AIV5 does improve performance.
     
 
-test_v5()
+# data_collection()
+
+
+def statistical_analysis():
+    # run to compute r-value and p-value, among other things
+    # hypothesize that the slope of the line (proportional to correlation coefficient) is nonzero, hope that it's positive
+    x = []
+    y = []
+    with open("test/data/v5_datapoints.txt") as pts:
+        for line in pts:
+            arr = line.split(" ")
+            x.append(float(arr[0]))
+            y.append(float(arr[1]))
+    
+    result = scipy.stats.linregress(x, y)
+
+    # With one iteration of 1 million games of Euchre, the results (with data found in v5_datapoints.txt) are:
+    print(result.rvalue) # prints 0.0.03945200921644532
+    print(result.pvalue) # prints 7.938671586906828e-05 (< 0.05)
+
+    # So, we fail to reject that the slope is 0 and conclude that there is a slight positive correlation between the number of rounds
+    # that call AIV5's new function and the number of rounds that a team of AIV5s wins. So, AIV5 does slightly improve performance.
+
+
+statistical_analysis()
