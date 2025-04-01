@@ -9,7 +9,7 @@ from classes.user import User
 clear = lambda: os.system('clear')
 
 # This is the card game Euchre. Rules: https://bicyclecards.com/how-to-play/euchre/
-# Cards used are 9 up to Ace. 'Going alone' for a round is not a feature of this script
+# Cards used are 9 up to Ace.
 
 def determine_winning_trick_so_far(played):
     # This function determines which played is currently winning the trick, as in who has played the best card so far
@@ -150,28 +150,35 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
 
     for player in player_order:
         not testing and time.sleep(2)
+
         player_map[player], best_suit, was_suit_picked, player_map[dlr_index], calling_player = \
             player_map[player].order_up_card(best_suit, flipped_card, dlr_index, player_map[dlr_index], testing)
+        
+        other_players = [player_num for player_num in player_order if player_num != player]
+        action = "call" if was_suit_picked else "pass"
+        for other_player in other_players:
+            player_map[other_player].update_probability_table(player, action, flipped_card, flipped_card.suit)
+
         if was_suit_picked:
             break
         else:
-            other_players = [player_num for player_num in player_order if player_num != player]
             for other_player in other_players:
-                player_map[other_player].update_probability_table(player, "pass", flipped_card.suit)
                 random_integer = random.randint(1, 100)
                 if ((player % 2) != (other_player % 2) and (random_integer <=20)):
-                    not testing and player_map[other_player].generate_smack_talk("pass")
-                    not testing and time.sleep(3)
+                    not testing and player_map[other_player].generate_smack_talk("pass", flipped_card)
+                    not testing and time.sleep(1.5)
 
     if not was_suit_picked:
         not testing and time.sleep(2)
         not testing and clear()
         not testing and print(colored(f'Since everyone passed, players will now have the chance to choose the trump suit.', 'green'))
         not testing and print(f'\n{player_map[player_order[0]].name} will go first.\n')
+
         for player in player_order:
             not testing and time.sleep(2)
             best_suit, was_suit_picked, calling_player = \
-                player_map[player].choose_call_suit(best_suit, flipped_card, testing, dlr_index)
+                player_map[player].choose_call_suit(best_suit, flipped_card, testing)
+            
             if was_suit_picked:
                 break
             else:
@@ -179,7 +186,7 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
                 for other_player in other_players:
                     for suit in ['Clubs', 'Diamonds', 'Hearts', 'Spades']:
                         if suit != flipped_card.suit:
-                            player_map[other_player].update_probability_table(player, "pass", suit)
+                            player_map[other_player].update_probability_table(player, "pass", flipped_card, suit)
 
 
     if not was_suit_picked:

@@ -4,16 +4,16 @@ import scipy.stats
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import random
 from classes.aiv3 import AIV3
-from classes.aiv5 import AIV5
+from classes.aiv4 import AIV4
 from classes.cards import Deck
 from classes.player import Team
 import engine
 
-# This test examines how well AIV5 actually performs, since its updated functions are not always called.
+# This test examines how well AIV4 actually performs, since its updated functions are not always called.
 # Every 100 games, a new "point" will be added to the list
 
-x = [] # % of rounds in 100 games that go to a second "pass" (and thus the updated AIV5 functions are called)
-y = [] # % of those rounds that a team of AIV5s wins (against a team of AIV3s)
+x = [] # % of rounds in 100 games that go to a second "pass" (and thus the updated AIV4 functions are called)
+y = [] # % of those rounds that a team of AIV4s wins (against a team of AIV3s)
 
 # create global variables (*for testing purposes only*)
 second_pass_count = 0
@@ -150,10 +150,10 @@ def play_game(p1, p2, p3, p4, testing):
             return "Team 2"
 
 def data_collection():
-    # run this by uncommenting function below if you want to collect more data in the v5_datapoints.txt file
+    # run this by uncommenting function below if you want to collect more data in the v4_datapoints.txt file
 
     for i in range(1000000):
-        play_game(AIV5(1), AIV3(2), AIV5(3), AIV3(4), True)
+        play_game(AIV4(1), AIV3(2), AIV4(3), AIV3(4), True)
 
         if i != 0 and i % 100 == 0:
             global second_pass_count
@@ -163,7 +163,7 @@ def data_collection():
             x.append(second_pass_count / round_count)
             y.append(round_wins / round_count)
 
-            file = open("test/data/v5_datapoints.txt", "a")
+            file = open("test/data/v4_datapoints.txt", "a")
             file.write(f"{(second_pass_count / round_count)} {round_wins / round_count}\n")
 
             round_wins = 0
@@ -179,7 +179,7 @@ def statistical_analysis():
     # hypothesize that the slope of the line (proportional to correlation coefficient) is nonzero, hope that it's positive
     x = []
     y = []
-    with open("test/data/v5_datapoints.txt") as pts:
+    with open("test/data/v4_datapoints.txt") as pts:
         for line in pts:
             arr = line.split(" ")
             x.append(float(arr[0]))
@@ -187,12 +187,12 @@ def statistical_analysis():
     
     result = scipy.stats.linregress(x, y)
 
-    # With one iteration of 1 million games of Euchre, the results (with data found in v5_datapoints.txt) are:
+    # With one iteration of 1 million games of Euchre, the results (with data found in v4_datapoints.txt) are:
     print(result.rvalue) # prints 0.0.03945200921644532
     print(result.pvalue) # prints 7.938671586906828e-05 (< 0.05)
 
     # So, we fail to reject that the slope is 0 and conclude that there is a slight positive correlation between the number of rounds
-    # that call AIV5's new function and the number of those rounds that a team of AIV5s wins. So, AIV5 does slightly improve performance.
+    # that call AIV4's new function and the number of those rounds that a team of AIV4s wins. So, AIV4 does slightly improve performance.
 
 
 statistical_analysis()

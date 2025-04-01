@@ -11,7 +11,6 @@ class User(Player):
     def order_up_card(self, suit: str, flipped_c: Card, dlr_index: int, dealer: Player, testing: bool):
     # This allows the user to tell a player whether to pick up the flipped card and call that suit clincher
         
-        time.sleep(1)
         not testing and clear()
         options = ['y', 'n']
         print(f'{self.name}, it\'s your turn. Your hand is: \n')

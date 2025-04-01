@@ -1,24 +1,120 @@
-import sys
-import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from classes.aiv3 import AIV3
-import openai
-import json
-from termcolor import colored
+from classes.cards import Card
 
 class AIV4(AIV3):
-    def generate_smack_talk(self, action: str):
-        openai.api_base = "http://localhost:1234/v1"
-        openai.api_key = ""
+    """
+    AIV4 inherits from AIV3. AIV4 overrides the function choose_call_suit that chooses the best suit if the 
+    game gets to the stage where a trump suit must be called (~30% of the time), 
+    and the function must_call_suit that's called if the player must choose the trump suit (almost never).
+    """
+    def choose_call_suit(self, suit: str, flipped_c: Card, testing: bool):
+        # Determine the best suit to call (excluding the trump suit) based on the probability table
+        was_card_picked = False
+        suits = ['Clubs', 'Diamonds', 'Hearts', 'Spades']
+        best_suit = ['', 0]
 
-        pt_str = json.dumps(self.PT, indent=2)
+        # calculate the best suit that wasn't the flipped card suit
+        for suit_type in suits:
+            if suit_type == flipped_c.suit:
+                continue
 
-        completion = openai.ChatCompletion.create(
-        model = "local-model",
-        messages = [
-            {"role": "system", "content": 
-                "You are an expert in the card game Euchre. You are playing against another team and the game is intense. Only respond in one (1) sentence. I will provide a probability table of players' cards and the most recent player action. Base the severity of your trash talk on players' probabilities, but never specifically say the values. Never say a specific percentage."},
-            {"role": "user", "content": "Trash talk other players. Probability Table: " + pt_str + "\nAction: " + action}
-        ]
-        )
-        print(colored(f'{self.name}: {completion["choices"][0]["message"]["content"]}', 'blue'))
+            teammate_number = ((self.number + 1) % 4) + 1
+            opponent_numbers = [p for p in [1, 2, 3, 4] if p not in [self.number, teammate_number]]
+            high_value_cards = self.get_high_value_cards(suit_type)
+            teammate_trump_prob = sum(self.PT[teammate_number][card] for card in high_value_cards)
+            opponent_trump_prob = sum(self.PT[opponent_numbers[0]][card] for card in high_value_cards) + sum(self.PT[opponent_numbers[1]][card] for card in high_value_cards)
+
+            picked_value = self.eval_trump_choice(teammate_trump_prob, opponent_trump_prob, suit_type)
+
+            if (picked_value) > best_suit[1]:
+                best_suit = [suit_type, picked_value]
+
+        passed_value = self.eval_alternative_call_suit(flipped_c.suit)
+
+        # if the value of out best suit is better than the predicted value of our opponent's best suit, call the suit. Otherwise, pass
+        # and hope either we can stop them from taking all 5 tricks in the next stage of the game or that our teammate has a
+        # better hand
+        if (best_suit[1]) >= passed_value:
+            suit = best_suit[0]
+            was_card_picked  = True
+            caller = self
+        else:
+            was_card_picked = False
+            caller = None
+            not testing and print(f'{self.name} passed on calling a trump suit.')
+        return suit, was_card_picked, caller
+    
+    def eval_alternative_call_suit(self, suit: str):
+        # This function evaluates the value of the opponents' best cards
+        teammate_number = ((self.number + 1) % 4) + 1
+        opponent_numbers = [p for p in [1, 2, 3, 4] if p not in [self.number, teammate_number]]
+        suit_prob = {suit: 0 for suit in ['Clubs', 'Diamonds', 'Hearts', 'Spades']}
+
+        # calculate suit that they're most likely to have a good hand in 
+        for suit_type in ['Clubs', 'Diamonds', 'Hearts', 'Spades']:
+            if suit == suit_type:
+                continue
+            high_value_cards = self.get_high_value_cards(suit_type)
+            opponent_trump_prob = sum(self.PT[opponent_numbers[0]][card] for card in high_value_cards) + sum(self.PT[opponent_numbers[1]][card] for card in high_value_cards)
+            suit_prob[suit_type] = opponent_trump_prob
+
+        max_prob = 0
+        best_suit = ''
+        for suit_type in ['Clubs', 'Diamonds', 'Hearts', 'Spades']:
+            if suit == suit_type:
+                continue
+            if suit_prob[suit_type] >= max_prob:
+                max_prob = suit_prob[suit_type]
+                best_suit = suit_type
+
+        off_suit = {"Spades": "Clubs", "Clubs": "Spades", "Diamonds": "Hearts", "Hearts": "Diamonds"}
+
+        # make an educated guess on the most likely value of opponents' cards
+        point_dict = {f'Jack of {best_suit}': 15, f'Jack of {off_suit[best_suit]}': 13, f'Ace of {best_suit}': 11, f'King of {best_suit}': 10,
+                            f'Queen of {best_suit}': 9, f'10 of {best_suit}': 8, f'9 of {best_suit}': 7}
+        total = 0
+        
+        # find 5 most likely cards opponent has in their best suit
+        card_list = {f'Jack of {best_suit}': max(self.PT[opponent_numbers[0]][f'Jack of {best_suit}'], self.PT[opponent_numbers[1]][f'Jack of {best_suit}']),
+                     f'Jack of {off_suit[best_suit]}':max(self.PT[opponent_numbers[0]][f'Jack of {off_suit[best_suit]}'], self.PT[opponent_numbers[1]][ f'Jack of {off_suit[best_suit]}']),
+                     f'Ace of {best_suit}':  max(self.PT[opponent_numbers[0]][f'Ace of {best_suit}'], self.PT[opponent_numbers[1]][f'Ace of {best_suit}']),
+                     f'King of {best_suit}': max(self.PT[opponent_numbers[0]][f'King of {best_suit}'], self.PT[opponent_numbers[1]][f'King of {best_suit}']),
+                     f'Queen of {best_suit}': max(self.PT[opponent_numbers[0]][f'Queen of {best_suit}'], self.PT[opponent_numbers[1]][f'Queen of {best_suit}']),
+                     f'10 of {best_suit}': max(self.PT[opponent_numbers[0]][f'10 of {best_suit}'], self.PT[opponent_numbers[1]][f'10 of {best_suit}']),
+                     f'9 of {best_suit}': max(self.PT[opponent_numbers[0]][f'9 of {best_suit}'], self.PT[opponent_numbers[1]][f'9 of {best_suit}'])}
+
+        # add up point values (divided by 2 since opponents, on average, won't have all 5 of their most likely cards) 
+        for card in sorted(card_list, key=card_list.get, reverse=True)[0:5]:
+            total += point_dict[card] / 2
+
+        return total
+    
+    def must_call_suit(self, suit: str, flipped_c: Card):
+        # This function picks the best suit based on the probability table if self MUST call a suit
+        # because everyone has passed twice. 
+        was_card_picked = False
+        suits = ['Clubs', 'Diamonds', 'Hearts', 'Spades']
+        best_suit = ['', 0]
+
+        # calculate the best suit that wasn't the flipped card suit
+        for suit_type in suits:
+            if suit_type == flipped_c.suit:
+                continue
+
+            teammate_number = ((self.number + 1) % 4) + 1
+            opponent_numbers = [p for p in [1, 2, 3, 4] if p not in [self.number, teammate_number]]
+            high_value_cards = self.get_high_value_cards(suit_type)
+            teammate_trump_prob = sum(self.PT[teammate_number][card] for card in high_value_cards)
+            opponent_trump_prob = sum(self.PT[opponent_numbers[0]][card] for card in high_value_cards) + sum(self.PT[opponent_numbers[1]][card] for card in high_value_cards)
+
+            picked_value = self.eval_trump_choice(teammate_trump_prob, opponent_trump_prob, suit_type)
+
+            if (picked_value) > best_suit[1]:
+                best_suit = [suit_type, picked_value]
+
+        # call our best suit, since we must call the suit at this stage
+        suit = best_suit[0]
+        was_card_picked  = True
+        caller = self
+
+        return suit, was_card_picked, caller
