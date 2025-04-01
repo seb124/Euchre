@@ -10,10 +10,11 @@ from classes.cards import Deck
 class AIV1(Computer):
     """
     AIV1 inherits from Computer, the original Euchre AI agent. AIV1 initializes a probability table, updates 
-    the probability table with a conservative approach, and pick or passes on the flipped card based on a heuristic. 
+    the probability table with a conservative approach, and pick or passes on the flipped card based on the heuristic
+    detailed in order_up_card. 
     """
     # At the start of each round, initialize the PT for each player
-    def __init__(self, number):
+    def __init__(self, number: int):
         super().__init__(number)
         deck = Deck()
         card_list = deck.build()
@@ -25,13 +26,8 @@ class AIV1(Computer):
         }
 
     def update_probability_table(self, player_num: int, action: str, flipped_c: Card, suit: str):
-        """
-        Update probability table when a player passes or calls trump.
-        
-        player_num: The player who made the decision (1, 2, 3, or 4)
-        action: "pass" or "call"
-        trump_suit: The suit in question (e.g., "Spades")
-        """
+        # This function updates the probability table when a player passes or calls trump.
+
         off_suit = {"Spades": "Clubs", "Clubs": "Spades", "Diamonds": "Hearts", "Hearts": "Diamonds"}
 
         # Indices for all 8 trump suit cards in the probability table
@@ -100,7 +96,8 @@ class AIV1(Computer):
                 for card in self.PT[p]:
                     self.PT[p][card] = self.PT[p][card] / total  # Normalize probabilities
 
-    def reset_probability_table(self, deck):
+    def reset_probability_table(self, deck: Deck):        
+        # Reset probability table after every round.
         card_list = deck.cards
         self.PT: dict[int, dict[str, float]] = {
             player: {card.card_string: 1/3 for card in card_list}  # Equal probability distribution initially
@@ -108,6 +105,7 @@ class AIV1(Computer):
         }
 
     def order_up_card(self, suit: str, flipped_c: Card, dlr_index: int, dealer: Player, testing: bool):
+        # Determines whether the player should order up the trump card based on the probability table.
         teammate_number = ((self.number + 1) % 4) + 1
         opponent_numbers = [p for p in [1, 2, 3, 4] if p not in [self.number, teammate_number]]
         high_value_cards = self.get_high_value_cards(flipped_c.suit)
@@ -128,7 +126,7 @@ class AIV1(Computer):
             not testing and print(f'{self.name} passed on calling {flipped_c.suit} as the trump suit.')
         return self, suit, was_card_picked, dealer, caller
     
-    def get_high_value_cards(self, suit):
+    def get_high_value_cards(self, suit: str):
         high_value_cards = []
         for card in self.hand:
             if suit == "Clubs" and (card.card_string == "Jack of Clubs" or "Jack of Spades" or "Ace of Clubs" or "King of Clubs" or "Queen of Clubs"):
@@ -142,13 +140,13 @@ class AIV1(Computer):
 
         return high_value_cards
     
-    def eval_trump_choice(self, teammate_trump_prob, opponent_trump_prob, suit):
+    def eval_trump_choice(self, teammate_trump_prob: float, opponent_trump_prob: float, suit: str):
         return self.card_weight(suit) + (teammate_trump_prob * self.calculate_bonus_penalty(teammate_trump_prob)) - (opponent_trump_prob * self.calculate_bonus_penalty(opponent_trump_prob))
     
     def evaluate_cards(self):
         return super().evaluate_cards()
 
-    def card_weight(self, suit):
+    def card_weight(self, suit: str):
         weights = self.evaluate_cards()
         if suit == "Clubs":
             return weights[0]
@@ -161,7 +159,7 @@ class AIV1(Computer):
         else:
             return 0
     
-    def calculate_bonus_penalty(self, probability):
+    def calculate_bonus_penalty(self, probability: float):
         if probability > 0.8:
             return 10
         elif probability > 0.5:
@@ -169,7 +167,8 @@ class AIV1(Computer):
         else:
             return 0
     
-    def eval_alternative(self, suit):
+    def eval_alternative(self, suit: str):
+        # Evaluates the best suit that the player has that is not the trump suit.
         best_alternative_val = 0
 
         for suit_type in ["Clubs", "Spades", "Diamonds", "Hearts"]:

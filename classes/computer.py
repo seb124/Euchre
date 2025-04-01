@@ -4,6 +4,9 @@ from classes.player import Player
 import time
 
 class Computer(Player):
+    """
+    The original, baseline AI for Euchre.
+    """
 
     POINTS_TO_CALL_SUIT = 30 
     
@@ -42,7 +45,7 @@ class Computer(Player):
             len_hand = len(self.hand)
             self.hand.pop(random.randint(0, len_hand - 1))
 
-    def choose_call_suit(self, suit: str, flipped_c: Card, testing: bool, dlr_index: int):
+    def choose_call_suit(self, suit: str, flipped_c: Card, testing: bool):
     # This will give the computer the option to call suit after everyone has refused to call the suit of flipped card
     # It will only call suit if the player has more pts in that suit than the variable POINTS_TO_CALL_SUIT
 

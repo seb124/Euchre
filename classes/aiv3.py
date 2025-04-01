@@ -8,28 +8,14 @@ from classes.cards import Card
 class AIV3(AIV2):
     """
     AIV3 inherits from AIV2. AIV3 makes adjustments to update_probability_table. 
-    The probability table is updated with a risky approach based on inherent the value of the cards.
+    The probability table is updated with a smarter/riskier approach based on inherent the value of the cards.
     """
     def update_probability_table(self, player_num: int, action: str, flipped_c: Card, suit: str):
-        """
-        Update probability table when a player passes or calls trump.
-        
-        player_num: The player who made the decision (1, 2, 3, or 4)
-        action: "pass" or "call"
-        trump_suit: The suit in question (e.g., "Spades")
-        """
-        off_suit = {"Spades": "Clubs", "Clubs": "Spades", "Diamonds": "Hearts", "Hearts": "Diamonds"}
+        # This function updates the probability table when a player passes or calls trump.
 
-        # Indices for all 8 trump suit cards in the probability table
-        trump_cards = [f"Jack of {suit}", 
-                               f"Jack of {off_suit[suit]}", 
-                               f"Ace of {suit}", 
-                               f"King of {suit}", 
-                               f"Queen of {suit}", 
-                               f"10 of {suit}", 
-                               f"9 of {suit}"]  # Jack of Trump, Jack of Off-Suit, A, K, Q, 10, 9
+        off_suit = {"Spades": "Clubs", "Clubs": "Spades", "Diamonds": "Hearts", "Hearts": "Diamonds"}
         
-        trump_reduction_factors = { # sets up what to reduce by
+        trump_reduction_factors = { # sets up what to reduce by. If a player passes, they're much less likely to have the higher cards of that suit
             f"Jack of {suit}": 0.7,  # Right Bower
             f"Jack of {off_suit[suit]}": 0.7,  # Left Bower
             f"Ace of {suit}": 0.6,
@@ -39,8 +25,8 @@ class AIV3(AIV2):
 
         #Ensure no opponent has AI's cards
         for p in self.PT.keys():  
-            removed_prob = 0  # Track total probability removed
-            count_unknown_cards = 0  # Count cards that can receive redistributed probability
+            removed_prob = 0  
+            count_unknown_cards = 0 
 
             for card in self.hand:  # Check each card in AI's hand
                 removed_prob += self.PT[p][card.card_string]
@@ -71,7 +57,7 @@ class AIV3(AIV2):
                     removed_prob += self.PT[player_num][card] * reduction
                     self.PT[player_num][card] *= (1 - reduction) 
 
-             # Redistribute the removed probability to other players
+            # Redistribute the removed probability to other players
             num_opponents = len(self.PT) - 1
             if num_opponents > 0:
                 for p in self.PT:
@@ -97,9 +83,3 @@ class AIV3(AIV2):
                 if total > 0:
                     for card in self.PT[p]:
                         self.PT[p][card] = self.PT[p][card] / total  # Normalize probabilities
-        #double check that it all adds up 
-        for p in self.PT:
-            total = sum(self.PT[p][card] for card in self.PT[p])
-            if total > 0:
-                for card in self.PT[p]:
-                    self.PT[p][card] /= total  

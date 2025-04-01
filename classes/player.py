@@ -2,7 +2,10 @@ from classes.cards import Card, Deck
 
 
 class Player:
-    def __init__(self, number):
+    """
+    Parent class; both User and Computer (and thus all the AI's) inherit + override many of these functions.
+    """
+    def __init__(self, number: int):
         self.number = number
         self.name = 'Player' + str(number)
         self.hand: list[Card] = []
@@ -152,7 +155,7 @@ class Player:
     def order_up_card(self, suit: str, flipped_c: Card, dlr_index: int, dealer):
         pass
 
-    def choose_call_suit(self, suit: str, flipped_c: Card, testing: bool, dlr_index: int):
+    def choose_call_suit(self, suit: str, flipped_c: Card, testing: bool):
         pass   
 
     def must_call_suit(self, suit: str, flipped_c: Card):
@@ -190,8 +193,8 @@ class Player:
 
 class Team:
     # Teams are made up of 2 players. In real Euchre, teammates sit across the table from each other. So odd players
-    # make up team1, and even numbered players make up team2
-    def __init__(self, player_a, player_b, points, tricks):
+    # make up team 1, and even numbered players make up team 2
+    def __init__(self, player_a: Player, player_b: Player, points: int, tricks: int):
         self.player_a = player_a
         self.player_b = player_b
         self.points = points

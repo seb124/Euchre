@@ -10,7 +10,8 @@ class AIV2(AIV1):
     """
     AIV2 inherits from AIV1. AIV2 takes into account the player position for the round.
     A player that goes first is given a negative adjustment, while a player that goes 
-    later in the round is given a positive adjustment.
+    later in the round is given a positive adjustment. This accounts for the fact that
+    when a player orders up a card, the dealer picks that card up.
     """
     def order_up_card(self, suit: str, flipped_c: Card, dlr_index: int, dealer: Player, testing: bool):
         teammate_number = ((self.number + 1) % 4) + 1
@@ -35,7 +36,9 @@ class AIV2(AIV1):
             not testing and print(f'{self.name} passed on calling {flipped_c.suit} as the trump suit.')
         return self, suit, was_card_picked, dealer, caller
     
-    def consider_turn_order(self, dlr_index):
+    def consider_turn_order(self, dlr_index: int):
+        # Adjust value of ordering up the trump card based on position and based on whether self
+        # or self's teammate is the dealer.
         position_adjustment = {0: -3, 1: 3, 2: -2, 3: 6}
         player_order = [(dlr_index) % 4 + 1, (dlr_index + 1) % 4 + 1, (dlr_index + 2) % 4 + 1, dlr_index]
         return position_adjustment[player_order.index(self.number)]

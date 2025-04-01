@@ -1,12 +1,14 @@
 from classes.aiv3 import AIV3
+from classes.cards import Card
 
 class AIV4(AIV3):
     """
-    AIV4 inherits from AIV3. AIV4 implements a function called must_call_suit that chooses the best suit if the 
-    game gets to the stage where a trump suit must be called.
+    AIV4 inherits from AIV3. AIV4 overrides the function choose_call_suit that chooses the best suit if the 
+    game gets to the stage where a trump suit must be called (~30% of the time), 
+    and the function must_call_suit that's called if the player must choose the trump suit (almost never).
     """
-    def choose_call_suit(self, suit, flipped_c, testing, dlr_index):
-
+    def choose_call_suit(self, suit: str, flipped_c: Card, testing: bool):
+        # Determine the best suit to call (excluding the trump suit) based on the probability table
         was_card_picked = False
         suits = ['Clubs', 'Diamonds', 'Hearts', 'Spades']
         best_suit = ['', 0]
@@ -29,7 +31,7 @@ class AIV4(AIV3):
 
         passed_value = self.eval_alternative_call_suit(flipped_c.suit)
 
-        # if our best suit is better than the predicted value of our opponent's best suit, call the suit. Otherwise, pass
+        # if the value of out best suit is better than the predicted value of our opponent's best suit, call the suit. Otherwise, pass
         # and hope either we can stop them from taking all 5 tricks in the next stage of the game or that our teammate has a
         # better hand
         if (best_suit[1]) >= passed_value:
@@ -42,7 +44,8 @@ class AIV4(AIV3):
             not testing and print(f'{self.name} passed on calling a trump suit.')
         return suit, was_card_picked, caller
     
-    def eval_alternative_call_suit(self, suit):
+    def eval_alternative_call_suit(self, suit: str):
+        # This function evaluates the value of the opponents' best cards
         teammate_number = ((self.number + 1) % 4) + 1
         opponent_numbers = [p for p in [1, 2, 3, 4] if p not in [self.number, teammate_number]]
         suit_prob = {suit: 0 for suit in ['Clubs', 'Diamonds', 'Hearts', 'Spades']}
@@ -86,7 +89,9 @@ class AIV4(AIV3):
 
         return total
     
-    def must_call_suit(self, suit, flipped_c):
+    def must_call_suit(self, suit: str, flipped_c: Card):
+        # This function picks the best suit based on the probability table if self MUST call a suit
+        # because everyone has passed twice. 
         was_card_picked = False
         suits = ['Clubs', 'Diamonds', 'Hearts', 'Spades']
         best_suit = ['', 0]

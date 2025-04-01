@@ -10,7 +10,7 @@ from classes.cards import Card
 
 class AISmack(AIV4):
     """
-    AIVSmack inherits from AIV5. The added functionality to AIVSmack is the LM Studio smack-talking functionality. 
+    AISmack inherits from AIV4. The added functionality to AIVSmack is the LM Studio smack-talking functionality. 
     The local model takes in the probability table and most recent action in and formulates a response based on these inputs. 
     """
     def __init__(self, number):
