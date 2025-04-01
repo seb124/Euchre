@@ -11,7 +11,6 @@ import json
 player_mapper = {"User": User, "Computer": Computer, "AIV1": AIV1, "AIV2": AIV2, "AIV3": AIV3, "AIV4": AIV4, "AISmack": AISmack}
 
 def main():
-    # prompt user for testing or not
     testing = True
 
     with open('config/config.json') as f:
