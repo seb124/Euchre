@@ -198,8 +198,3 @@ def round_data_collection(p1: str, p2: str, p3: str, p4: str, games: int):
 
 # put any players here to get/add round data based on those teams
 round_data_collection("computer", "aiv1", "computer", "aiv1", 1000)
-
-# TODO: put this in another file - statistical_analysis or something
-# stats = scipy.stats.binomtest(k=wins, n=10000)
-# print(wins / 10000)
-# print(stats.pvalue)

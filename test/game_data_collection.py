@@ -60,4 +60,4 @@ def game_data_collection(p1: str, p2: str, p3: str, p4: str, games: int):
 # game_data_collection("AIV3", "AIV2", "AIV3", "AIV2", 100000)
 # game_data_collection("AIV4", "AIV2", "AIV4", "AIV2", 100000)
 
-# game_data_collection("AIV3", "AIV4", "AIV3", "AIV4", 100000) # not needed
+# game_data_collection("AIV4", "AIV3", "AIV4", "AIV3", 100000)
