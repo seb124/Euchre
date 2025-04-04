@@ -1,26 +1,42 @@
 import sys
 import os
-import scipy.stats
+import csv
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import random
+from classes.computer import Computer
+from classes.aiv1 import AIV1
+from classes.aiv2 import AIV2
 from classes.aiv3 import AIV3
 from classes.aiv4 import AIV4
 from classes.cards import Deck
 from classes.player import Team
 import engine
 
-# This test examines how well AIV4 actually performs, since its updated functions are not always called.
-# Every 100 games, a new "point" will be added to the list
 
-x = [] # % of rounds in 100 games that go to a second "pass" (and thus the updated AIV4 functions are called)
-y = [] # % of those rounds that a team of AIV4s wins (against a team of AIV3s)
+"""
+This file collects data for every *round* played. Run the function below to collect this data.
+Because up to 20 rounds can be played per game, the round_data csv files are not created - otherwise, they
+could have up to 20,000,000 lines of data in them. As such, only the game wins data, found in the 
+"game_data_collection.py" file, is recorded/analyzed for now.
 
-# create global variables (*for testing purposes only*)
-second_pass_count = 0
-round_wins = 0
-round_count = 0
+round_data_collection can be ran (shown below) to create/populate the corresponding round_data csv files.
+We only record player 1's hand/decisions for now.
 
-def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index, dlr, ldr_index, testing):
+Round data could be used for more sophisticated analysis and for machine learning purposes (for example,
+reducing the number of times a team loses after a player on that team orders up the trump card).
+"""
+
+# binomial test this. null: p = 0.5 alt: p != 0.5
+# scipy.stats.binomtest
+# count # wins and find p-value. Awesome
+# also record all hands and status of round in a csv file for completeness
+
+line = [[], None, "none", None]
+
+
+def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index, dlr, ldr_index, testing, path):
+    global line
+
     deck.deal_cards(player1)
     deck.deal_cards(player2)
     deck.deal_cards(player3)
@@ -33,6 +49,8 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
 
     flipped_card = deck.flip_card()
 
+    line[0] = [c.card_string for c in player1.hand]
+    line[1] = flipped_card.card_string
 
 
     best_suit = ''
@@ -52,15 +70,17 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
         player_map[player], best_suit, was_suit_picked, player_map[dlr_index], calling_player = \
             player_map[player].order_up_card(best_suit, flipped_card, dlr_index, player_map[dlr_index], testing)
         if was_suit_picked:
+            if player == 1:
+                line[2] = "call"
             break
         else:
+            if player == 1:
+                line[2] = "pass"
             other_players = [player_num for player_num in player_order if player_num != player]
             for other_player in other_players:
                 player_map[other_player].update_probability_table(player, "pass", flipped_card, flipped_card.suit)
 
     if not was_suit_picked:
-        global second_pass_count
-        second_pass_count += 1
         for player in player_order:
             best_suit, was_suit_picked, calling_player = \
                 player_map[player].choose_call_suit(best_suit, flipped_card, testing)
@@ -100,23 +120,29 @@ def play_round(team1, team2, player1, player2, player3, player4, deck, dlr_index
     team2.tricks = player2.tricks_won + player4.tricks_won
 
     if team1.tricks > team2.tricks:
-        global round_wins
-        round_wins += 1
+        line[3] = True
         if calling_player.name == 'Player2' or calling_player.name == 'Player4' or team1.tricks == 5:
             team1.points += 2
         else:
             team1.points += 1
     elif team2.tricks > team1.tricks:
+        line[3] = False
         if calling_player.name == 'Player1' or calling_player.name == 'Player3' or team2.tricks == 5:
             team2.points += 2
         else:
             team2.points += 1
 
 
+    # write data for round to csv file
+    with open(path, "a") as file:
+        writer = csv.writer(file, delimiter=",")
+        writer.writerow(line)
+
+    line = [[], None, "none", None]
+
     return team1, team2, player1, player2, player3, player4
 
-def play_game(p1, p2, p3, p4, testing):
-
+def play_game(p1, p2, p3, p4, testing, path):
     d = Deck()
     d.show()
 
@@ -130,9 +156,7 @@ def play_game(p1, p2, p3, p4, testing):
 
     while team_1.points < 11 and team_2.points < 11:
         team_1, team_2, p1, p2, p3, p4 = play_round(team_1, team_2, p1, p2, p3,
-                                                                            p4, d, dealer_index, dealer, leader_index, testing)
-        global round_count
-        round_count += 1
+                                                                            p4, d, dealer_index, dealer, leader_index, testing, path)
         dealer_index = dealer_index % 4 + 1
         leader_index = leader_index % 4 + 1
         dealer = list(players.keys())[list(players.values()).index(dealer_index)]
@@ -148,51 +172,29 @@ def play_game(p1, p2, p3, p4, testing):
             return "Team 1"
         elif team_2.points >= 11:
             return "Team 2"
+        
+player_mapper = {"computer": Computer, "aiv1": AIV1, "aiv2": AIV2, "aiv3": AIV3, "aiv4": AIV4}
 
-def data_collection():
-    # run this by uncommenting function below if you want to collect more data in the v4_datapoints.txt file
+def round_data_collection(p1: str, p2: str, p3: str, p4: str, games: int):
+    global line
 
-    for i in range(1,1000001):
-        play_game(AIV4(1), AIV3(2), AIV4(3), AIV3(4), True)
+    player_1 = player_mapper[p1.lower()]
+    player_2 = player_mapper[p2.lower()]
+    player_3 = player_mapper[p3.lower()]
+    player_4 = player_mapper[p4.lower()]
 
-        if i % 100 == 0:
-            global second_pass_count
-            global round_count
-            global round_wins
+    if p1 == p3 and p2 == p4:
+        path = f"test/data/round_data/{p1.lower()}_{p2.lower()}_round_data.csv"
+    else:
+        path = f"test/data/round_data/{p1.lower()}_{p2.lower()}_{p3.lower()}_{p4.lower()}_round_data.csv"
 
-            x.append(second_pass_count / round_count)
-            y.append(round_wins / round_count)
-
-            file = open("test/data/v4_datapoints.txt", "a")
-            file.write(f"{(second_pass_count / round_count)} {round_wins / round_count}\n")
-
-            round_wins = 0
-            second_pass_count = 0
-            round_count = 0
-
-
-data_collection()
-
-
-def statistical_analysis():
-    # run to compute r-value and p-value, among other things
-    # hypothesize that the slope of the line (proportional to correlation coefficient) is nonzero, hope that it's positive
-    x = []
-    y = []
-    with open("test/data/v4_datapoints.txt") as pts:
-        for line in pts:
-            arr = line.split(" ")
-            x.append(float(arr[0]))
-            y.append(float(arr[1]))
+    if not os.path.exists(path):
+        with open(path, "w") as file:
+            file.write("hand,trump,action,round_win\n")
     
-    result = scipy.stats.linregress(x, y)
-
-    # With one iteration of 1 million games of Euchre, the results (with data found in v4_datapoints.txt) are:
-    print(result.rvalue) # prints 0.03945200921644532
-    print(result.pvalue) # prints 7.938671586906828e-05 (< 0.05)
-
-    # So, we fail to reject that the slope is 0 and conclude that there is a slight positive correlation between the number of rounds
-    # that call AIV4's new function and the number of those rounds that a team of AIV4s wins. So, AIV4 does slightly improve performance.
+    for _ in range(games):
+        play_game(player_1(1), player_2(2), player_3(3), player_4(4), True, path)
 
 
-statistical_analysis()
+# put any players here to get/add round data based on those teams
+round_data_collection("computer", "aiv1", "computer", "aiv1", 1000)
