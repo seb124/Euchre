@@ -1,0 +1,12 @@
+name: euchre
+channels:
+  - https://repo.anaconda.com/pkgs/main
+  - https://repo.anaconda.com/pkgs/r
+  - conda-forge
+dependencies:
+  - termcolor
+  - openai==1.68.2
+  - conda-forge::numpy
+  - conda-forge::scipy
+  - matplotlib
+prefix: /opt/homebrew/Caskroom/miniconda/base/envs/euchre
